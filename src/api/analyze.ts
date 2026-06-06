@@ -179,7 +179,7 @@ async function runJob(params: JobParams): Promise<void> {
     // Step 9: Kit — subscribe, send transactional report email, apply quiz tags
     const reportUrl = `${import.meta.env.SITE}/koalafied/report/${report_id}`;
     try {
-      await subscribeWithReport(email, reportUrl, report_id, quiz);
+      await subscribeWithReport(email, reportUrl, quiz);
     } catch (kitErr) {
       // Non-fatal: report is already delivered via browser redirect. Log + tag for failure sequence.
       console.error(`[koalafied] Kit failed for job ${job_id}:`, kitErr);

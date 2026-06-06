@@ -1,8 +1,8 @@
 // Kit v4 API integration for Koalafied
-// Report emails are sent via per-submission broadcasts with the URL baked into
-// content at creation time — eliminates the custom-field overwrite race and
-// ensures repeat submitters always receive their specific report link.
+// Handles subscriber creation and quiz/lifecycle tagging.
+// Report delivery email is handled by Resend (src/lib/resend.ts) — not Kit.
 
+import { sendReportEmail } from "@/lib/resend";
 import type { QuizAnswers } from "@/lib/types";
 
 if (!process.env.KIT_API_KEY) {
@@ -45,13 +45,11 @@ const QUIZ_TAGS: Record<keyof QuizAnswers, Record<string, string>> = {
   },
 };
 
-// Creates or updates the subscriber, applies quiz tags, and sends the report
-// delivery email. Throws on subscriber create or broadcast failure (both logged
-// and surfaced via kitRetry in analyze.ts).
+// Creates or updates the subscriber in Kit, applies all tags, and sends the
+// report delivery email via Resend. Throws on subscriber create or email failure.
 export async function subscribeWithReport(
   email: string,
   reportUrl: string,
-  reportId: string,
   quiz: QuizAnswers,
 ): Promise<void> {
   const subRes = await kitFetch("/subscribers", {
@@ -67,7 +65,7 @@ export async function subscribeWithReport(
     console.error("[koalafied] Kit tagging failed:", err),
   );
 
-  await sendReportEmail(email, reportUrl, reportId);
+  await sendReportEmail(email, reportUrl);
 }
 
 // Tags subscriber with report_failed so Kit routes them to the failure sequence.
@@ -81,66 +79,8 @@ export async function tagReportFailed(email: string): Promise<void> {
   }).catch(() => {});
 }
 
-// Creates a unique per-submission tag, applies it to the subscriber, then creates
-// a Kit broadcast targeting that tag with the report URL baked into the body.
-// published_at = now triggers immediate delivery. Each submission gets its own
-// broadcast so repeat submitters always receive the correct URL.
-async function sendReportEmail(email: string, reportUrl: string, reportId: string): Promise<void> {
-  const tagName = `koalafied:rpt:${reportId.slice(0, 8)}`;
-  const tagId = await ensureTag(tagName);
-  if (!tagId) throw new Error("Failed to create submission tag for report email");
-
-  const tagRes = await kitFetch(`/tags/${tagId}/subscribers`, {
-    method: "POST",
-    body: JSON.stringify({ email_address: email }),
-  });
-  if (!tagRes.ok) {
-    throw new Error(`Failed to tag subscriber for report delivery: ${tagRes.status} ${await tagRes.text()}`);
-  }
-
-  // KIT_REPORT_TEMPLATE_ID: optional — set in .env once a branded template is
-  // created in Kit UI. Wraps the content in header/footer + unsubscribe link.
-  const templateId = process.env.KIT_REPORT_TEMPLATE_ID
-    ? Number(process.env.KIT_REPORT_TEMPLATE_ID)
-    : undefined;
-
-  const broadcastRes = await kitFetch("/broadcasts", {
-    method: "POST",
-    body: JSON.stringify({
-      subject: "Your Koalafied PM report is ready",
-      content: reportEmailHtml(reportUrl),
-      ...(templateId !== undefined && { email_template_id: templateId }),
-      subscriber_filter: [{ all: [{ type: "tag", ids: [Number(tagId)] }] }],
-      published_at: new Date().toISOString(),
-    }),
-  });
-  if (!broadcastRes.ok) {
-    throw new Error(`Kit broadcast failed: ${broadcastRes.status} ${await broadcastRes.text()}`);
-  }
-}
-
-function reportEmailHtml(reportUrl: string): string {
-  return `
-<p>Your Koalafied PM fit analysis is ready.</p>
-<p style="margin:24px 0;">
-  <a href="${reportUrl}"
-     style="background:#000;color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600;display:inline-block;">
-    View Your Report &rarr;
-  </a>
-</p>
-<p>Or paste this link in your browser:<br>
-  <a href="${reportUrl}">${reportUrl}</a>
-</p>
-<p style="color:#888;font-size:12px;margin-top:24px;">
-  This link expires in 30 days. Run a fresh analysis at
-  <a href="https://mattgeer.com/koalafied" style="color:#888;">mattgeer.com/koalafied</a>.
-</p>
-  `.trim();
-}
-
-// Applies the master subscriber tag, report_delivered tag, and all quiz tags.
-// koalafied:subscriber — every successful submission; master segment for nurture sequences
-// koalafied:report_delivered — successful reports only; used as the nurture sequence trigger
+// koalafied:subscriber     — every successful submission; master Koalafied segment
+// koalafied:report_delivered — successful reports only; nurture sequence trigger
 async function applySubscriberTags(email: string, quiz: QuizAnswers): Promise<void> {
   const tagNames = [
     "koalafied:subscriber",
@@ -162,8 +102,6 @@ async function applySubscriberTags(email: string, quiz: QuizAnswers): Promise<vo
   );
 }
 
-// Creates the tag if it doesn't exist; Kit returns the existing tag if the name matches.
-// Returns the tag ID or null on any failure.
 async function ensureTag(name: string): Promise<string | null> {
   try {
     const res = await kitFetch("/tags", {
