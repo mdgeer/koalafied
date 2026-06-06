@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Koalafied — Wireframe: Report Page</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; }
+
+    /* Sticky header */
+    .header { background: #222; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 18px; font-weight: 700; }
+    .pdf-btn { background: white; color: #222; border: none; padding: 8px 18px; font-size: 13px; font-weight: 700; border-radius: 5px; cursor: pointer; }
+
+    /* Fit hero */
+    .fit-hero { background: white; border-bottom: 2px solid #e8e8e8; padding: 36px 24px; }
+    .fit-hero-inner { max-width: 800px; margin: 0 auto; }
+    .role-label { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 4px; }
+    .role-title { font-size: 26px; font-weight: 700; margin-bottom: 24px; }
+    .score-row { display: flex; align-items: center; gap: 20px; margin-bottom: 22px; flex-wrap: wrap; }
+    .score-num { font-size: 52px; font-weight: 700; line-height: 1; }
+    .score-meta { font-size: 14px; color: #888; }
+    .score-bar-bg { flex: 1; min-width: 120px; background: #eee; border-radius: 999px; height: 14px; }
+    .score-bar-fill { background: #4caf50; height: 14px; border-radius: 999px; width: 76%; }
+    .pills { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill { padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+    .pill-green { background: #e8f5e9; color: #2e7d32; }
+    .pill-amber { background: #fff8e1; color: #e65100; }
+    .pill-red { background: #fce4ec; color: #c62828; }
+    .pill-blue { background: #e3f2fd; color: #1565c0; }
+
+    /* Sections */
+    .container { max-width: 800px; margin: 0 auto; padding: 28px 24px 60px; }
+    .section { background: white; border-radius: 8px; border: 2px solid #e0e0e0; margin-bottom: 14px; overflow: hidden; }
+    .section-header { padding: 18px 22px; border-left: 5px solid #ccc; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .section-header.green { border-left-color: #4caf50; }
+    .section-header.amber { border-left-color: #ff9800; }
+    .section-header.red { border-left-color: #f44336; }
+    .section-header.blue { border-left-color: #2196f3; }
+    .section-header.purple { border-left-color: #7c3aed; }
+    .section-header.slate { border-left-color: #607d8b; }
+    .section-num { font-size: 11px; color: #bbb; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .section-title { font-size: 16px; font-weight: 700; }
+    .section-body { padding: 0 22px 22px; border-left: 5px solid transparent; }
+    .section-body.green { border-left-color: #4caf50; background: #fafffa; }
+    .section-body.amber { border-left-color: #ff9800; background: #fffdf5; }
+    .section-body.red { border-left-color: #f44336; background: #fff9fa; }
+    .section-body.blue { border-left-color: #2196f3; background: #f5f9ff; }
+    .section-body.purple { border-left-color: #7c3aed; background: #fdf5ff; }
+    .section-body.slate { border-left-color: #607d8b; }
+
+    /* Cards inside sections */
+    .item-card { border: 1px solid #e8e8e8; border-radius: 7px; padding: 16px 18px; margin-top: 14px; background: white; }
+    .item-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+    .item-body { font-size: 14px; color: #555; line-height: 1.65; }
+    .item-fix { font-size: 13px; color: #e65100; font-weight: 600; margin-top: 10px; }
+    .tag { display: inline-block; background: #f0f0f0; padding: 3px 10px; border-radius: 4px; font-size: 12px; color: #666; margin-right: 6px; margin-top: 8px; }
+    .tag-red { background: #fce4ec; color: #c62828; }
+    .tag-green { background: #e8f5e9; color: #2e7d32; }
+
+    /* Resource cards */
+    .resource-card { border: 1px solid #e0e0e0; border-radius: 7px; padding: 16px 18px; margin-top: 14px; background: white; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .resource-info { flex: 1; }
+    .resource-link { display: inline-block; background: #222; color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .resource-for { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 700; margin: 16px 0 4px; }
+
+    /* Severity badges */
+    .severity { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-top: 8px; }
+    .severity-moderate { background: #fff3e0; color: #e65100; }
+    .severity-minor { background: #f3e5f5; color: #6a1b9a; }
+
+    /* AI tier callout */
+    .tier-callout { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 7px; padding: 16px 18px; margin-bottom: 16px; }
+    .tier-label { font-size: 13px; font-weight: 700; color: #1565c0; margin-bottom: 6px; }
+    .tier-body { font-size: 14px; color: #444; line-height: 1.6; }
+
+    /* Week blocks */
+    .week-block { border: 1px solid #e0e0e0; border-radius: 7px; padding: 18px; margin-top: 12px; }
+    .week-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 6px; }
+    .week-focus { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+    .week-actions { padding-left: 18px; }
+    .week-actions li { font-size: 14px; color: #555; padding: 4px 0; line-height: 1.5; }
+
+    /* Summary tags */
+    .summary-group { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 18px; }
+    .summary-group-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; font-weight: 700; margin-bottom: 8px; }
+
+    /* Priority badge */
+    .priority { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 4px; }
+
+    /* Download */
+    .download-section { text-align: center; padding: 40px 0 20px; }
+    .download-btn { background: #222; color: white; border: none; padding: 16px 40px; font-size: 16px; font-weight: 700; border-radius: 7px; cursor: pointer; }
+    .download-note { font-size: 12px; color: #aaa; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- STICKY HEADER -->
+  <div class="header">
+    <div class="logo">Koalafied</div>
+    <button class="pdf-btn">↓ Save as PDF</button>
+  </div>
+
+  <!-- FIT SCORE HERO -->
+  <div class="fit-hero">
+    <div class="fit-hero-inner">
+      <div class="role-label">Senior Product Manager</div>
+      <div class="role-title">Acme Corp — Product-Led Growth Team</div>
+      <div class="score-row">
+        <div>
+          <div class="score-num">76</div>
+          <div class="score-meta">Overall fit score</div>
+        </div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill"></div>
+        </div>
+      </div>
+      <div class="pills">
+        <span class="pill pill-green">● 4 Strong matches</span>
+        <span class="pill pill-amber">● 3 Ambiguous areas</span>
+        <span class="pill pill-red">● 2 Clear gaps</span>
+        <span class="pill pill-blue">● AI Tier 1 required</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- 01: FIT SUMMARY -->
+    <div class="section">
+      <div class="section-header slate">
+        <div><div class="section-num">01</div><div class="section-title">Fit Summary</div></div>
+      </div>
+      <div class="section-body slate" style="padding-top: 18px;">
+        <p style="font-size: 15px; line-height: 1.75; color: #444;">Strong candidate with a PM background that pattern-matches well to this role — particularly on discovery, stakeholder management, and B2B SaaS experience. The main gaps are data fluency (SQL) and AI tooling, both explicitly called out in the JD. Neither is a dealbreaker, but both need to be addressed before applying.</p>
+        <div class="summary-group">
+          <div>
+            <div class="summary-group-title">Top Strengths</div>
+            <span class="tag tag-green">Product discovery</span>
+            <span class="tag tag-green">Stakeholder mgmt</span>
+            <span class="tag tag-green">B2B SaaS</span>
+          </div>
+          <div>
+            <div class="summary-group-title">Top Gaps</div>
+            <span class="tag tag-red">SQL / analytics</span>
+            <span class="tag tag-red">AI Tier 1 skills</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02: STRENGTHS -->
+    <div class="section">
+      <div class="section-header green">
+        <div><div class="section-num">02</div><div class="section-title">Where You're Strong</div></div>
+        <span class="pill pill-green" style="font-size: 12px;">4 matches</span>
+      </div>
+      <div class="section-body green" style="padding-top: 6px;">
+        <div class="item-card">
+          <div class="item-title">Product Discovery</div>
+          <div class="item-body">3+ years of continuous discovery work including customer interviews, concept testing, and opportunity sizing. JD specifically asks for "strong discovery instincts" — well demonstrated.</div>
+        </div>
+        <div class="item-card">
+          <div class="item-title">Stakeholder Management</div>
+          <div class="item-body">Multiple examples of cross-functional alignment with engineering, design, and commercial teams. Strong match to JD requirement for "influencing without authority."</div>
+        </div>
+        <div class="item-card">
+          <div class="item-title">B2B SaaS Domain Fit</div>
+          <div class="item-body">5 years in B2B SaaS. Role is at a B2B company. Domain pattern-match reduces onboarding risk — hiring managers weight this heavily.</div>
+        </div>
+        <div class="item-card" style="border-style: dashed; background: #fafff9;">
+          <div class="item-title" style="color: #aaa;">+ 1 more strength</div>
+          <div class="item-body" style="color: #aaa;">Roadmap prioritization methodology (RICE framework, opportunity scoring)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03: AMBIGUOUS -->
+    <div class="section">
+      <div class="section-header amber">
+        <div><div class="section-num">03</div><div class="section-title">Ambiguous Areas</div></div>
+        <span class="pill pill-amber" style="font-size: 12px;">3 areas</span>
+      </div>
+      <div class="section-body amber" style="padding-top: 6px;">
+        <div class="item-card">
+          <div class="item-title">Data Analysis</div>
+          <div class="item-body">Resume mentions "data-informed decisions" but gives no specific examples of what analysis you ran, what metrics you owned, or what tools you used. Can't tell if you're writing SQL or reading dashboards someone else built.</div>
+          <div class="item-fix">→ Fix: Add 1–2 specific examples. "Analyzed cohort retention in Mixpanel to identify X, which led to Y% improvement."</div>
+        </div>
+        <div class="item-card">
+          <div class="item-title">Technical Fluency</div>
+          <div class="item-body">JD asks for "technical credibility with engineering teams" but your resume has no signals of technical background or how you've worked with engineers. Could go either way.</div>
+          <div class="item-fix">→ Fix: Add a line about how you collaborate with engineers — sprint rituals, how you write specs, any technical context you bring.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04: GAPS -->
+    <div class="section">
+      <div class="section-header red">
+        <div><div class="section-num">04</div><div class="section-title">Where You're Falling Short</div></div>
+        <span class="pill pill-red" style="font-size: 12px;">2 gaps</span>
+      </div>
+      <div class="section-body red" style="padding-top: 6px;">
+        <div class="item-card">
+          <div class="item-title">SQL / Data Fluency</div>
+          <div class="item-body">The JD requires "ability to self-serve data analysis using SQL." No evidence of SQL in your resume or background. Directly called out — not ambiguous.</div>
+          <span class="severity severity-moderate">Moderate gap</span>
+        </div>
+        <div class="item-card">
+          <div class="item-title">AI Tooling for PMs</div>
+          <div class="item-body">JD mentions "experience using AI tools to accelerate product work." Nothing in your resume signals this. See Section 05 for the full breakdown of what this role is actually asking for.</div>
+          <span class="severity severity-moderate">Moderate gap</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05: AI ASSESSMENT -->
+    <div class="section">
+      <div class="section-header blue">
+        <div><div class="section-num">05</div><div class="section-title">AI Skills Assessment</div></div>
+      </div>
+      <div class="section-body blue" style="padding-top: 18px;">
+        <div class="tier-callout">
+          <div class="tier-label">This role requires Tier 1 — Using AI tools to do PM work faster</div>
+          <div class="tier-body">Not managing AI products. Not building with AI. Just using tools like ChatGPT, Claude, or Notion AI to accelerate research, synthesis, and documentation. This is the most accessible tier to develop quickly.</div>
+        </div>
+        <p style="font-size: 14px; color: #444; line-height: 1.7;">You rated your AI skills as <strong>Comfortable with basics</strong>. For Tier 1, you're close — but your resume doesn't demonstrate it at all. One specific example of AI-assisted PM work closes this gap: "Used Claude to synthesize 40 customer interviews in 2 hours, reducing research synthesis time by 80%."</p>
+      </div>
+    </div>
+
+    <!-- 06: LEARNING PATH -->
+    <div class="section">
+      <div class="section-header purple">
+        <div><div class="section-num">06</div><div class="section-title">Your Learning Path</div></div>
+      </div>
+      <div class="section-body purple" style="padding-top: 6px;">
+        <div class="item-card">
+          <div class="priority">Priority 1 · ~3 weeks</div>
+          <div class="item-title">SQL for Product Managers</div>
+          <div class="item-body">Addresses the biggest explicit gap in this JD. You don't need to be a data engineer — basics are enough: SELECT, GROUP BY, JOINs, and writing funnel queries. This is learnable in a few weekends.</div>
+        </div>
+        <div class="item-card">
+          <div class="priority">Priority 2 · ~1 week</div>
+          <div class="item-title">AI Tools for PM Workflows (Tier 1)</div>
+          <div class="item-body">Integrate AI into 3–5 of your existing PM tasks: customer interview synthesis, PRD drafting, competitive research. Document the time saved and output quality. That becomes the resume line.</div>
+        </div>
+        <div class="item-card">
+          <div class="priority">Priority 3 · Ongoing</div>
+          <div class="item-title">Demonstrate technical collaboration</div>
+          <div class="item-body">Bring one clear example of how you've worked closely with engineering to your next interview. Even 2–3 stories ready to go changes how you interview on this dimension.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 07: RESOURCES -->
+    <div class="section">
+      <div class="section-header purple">
+        <div><div class="section-num">07</div><div class="section-title">Where to Learn</div></div>
+      </div>
+      <div class="section-body purple" style="padding-top: 8px;">
+        <div class="resource-for">For: SQL / Data Fluency</div>
+        <div class="resource-card">
+          <div class="resource-info">
+            <div class="item-title">Mode Analytics SQL Tutorial</div>
+            <div class="item-body" style="margin-top: 4px;">Free. PM-focused SQL exercises using real datasets. Best for learning the queries you'll actually run on the job. No fluff.</div>
+            <span class="tag">Free</span><span class="tag">SQL</span><span class="tag">Self-paced</span>
+          </div>
+          <a href="#" class="resource-link">View →</a>
+        </div>
+        <div class="resource-card">
+          <div class="resource-info">
+            <div class="item-title">IBM Data Analyst Certificate — Coursera</div>
+            <div class="item-body" style="margin-top: 4px;">Structured course with a credential you can add to your resume. Good if you want proof alongside the practical work.</div>
+            <span class="tag">Paid</span><span class="tag">Certificate</span>
+          </div>
+          <a href="#" class="resource-link">View →</a>
+        </div>
+
+        <div class="resource-for">For: AI Tools (Tier 1)</div>
+        <div class="resource-card">
+          <div class="resource-info">
+            <div class="item-title">Lenny's AI for PMs — Maven</div>
+            <div class="item-body" style="margin-top: 4px;">Cohort-based, PM-specific. Covers exactly the workflows this JD is asking about. Highest-signal resource for this specific gap.</div>
+            <span class="tag">Paid</span><span class="tag">Cohort</span><span class="tag">4 weeks</span>
+          </div>
+          <a href="#" class="resource-link">View →</a>
+        </div>
+        <div class="resource-card">
+          <div class="resource-info">
+            <div class="item-title">Exponent — PM Interview Prep</div>
+            <div class="item-body" style="margin-top: 4px;">Strong for interview prep across technical and behavioral questions. Relevant if you're actively applying now.</div>
+            <span class="tag">Paid</span><span class="tag">Interview prep</span>
+          </div>
+          <a href="#" class="resource-link">View →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 08: PROJECTS -->
+    <div class="section">
+      <div class="section-header purple">
+        <div><div class="section-num">08</div><div class="section-title">Projects to Build</div></div>
+      </div>
+      <div class="section-body purple" style="padding-top: 6px;">
+        <div class="item-card">
+          <div class="item-title">Build a retention cohort analysis</div>
+          <div class="item-body">Use a public dataset (Kaggle has several) to write SQL queries analyzing user retention by signup cohort. Write up your findings the way a PM would present to leadership — what does this tell you, and what would you do about it?</div>
+          <div style="margin-top: 10px;"><span class="tag">SQL</span><span class="tag">~5 hours</span><span class="tag">Beginner</span></div>
+          <div class="item-fix">Demonstrates: Data fluency, analytical thinking, PM communication style</div>
+        </div>
+        <div class="item-card">
+          <div class="item-title">Document an AI-assisted discovery sprint</div>
+          <div class="item-body">Run a real or simulated discovery sprint using Claude for synthesis and pattern-finding. Document the prompts you used, the time saved vs. doing it manually, and what the AI got right and wrong. Publish it as a short case study.</div>
+          <div style="margin-top: 10px;"><span class="tag">AI Tools</span><span class="tag">~3 hours</span><span class="tag">Beginner</span></div>
+          <div class="item-fix">Demonstrates: Tier 1 AI fluency, intellectual honesty, PM communication</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 09: RESUME -->
+    <div class="section">
+      <div class="section-header slate">
+        <div><div class="section-num">09</div><div class="section-title">Resume Recommendations</div></div>
+      </div>
+      <div class="section-body slate" style="padding-top: 6px;">
+        <div class="item-card">
+          <div class="item-title">Quantify every outcome</div>
+          <div class="item-body">Current: "Led discovery for new onboarding flow."<br />Better: "Led discovery for new onboarding flow, reducing time-to-first-value from 14 to 6 days (+40% D7 retention)."<br />No metric = no story. Numbers are the difference between a bullet and a proof point.</div>
+        </div>
+        <div class="item-card">
+          <div class="item-title">Mirror the JD's language on data</div>
+          <div class="item-body">JD uses "self-serve data analysis" and "SQL." Your resume uses "data-informed decisions." Generic phrases don't pass ATS or human screening. Match their words.</div>
+        </div>
+        <div class="item-card">
+          <div class="item-title">Add one AI workflow example</div>
+          <div class="item-body">Even one line closes the AI skills gap on paper. "Used Claude to synthesize 40 customer interviews, reducing analysis time from 2 days to 3 hours." Specific tool + specific task + specific result.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10: 30-DAY PLAN -->
+    <div class="section">
+      <div class="section-header slate">
+        <div><div class="section-num">10</div><div class="section-title">Your Next 30 Days</div></div>
+      </div>
+      <div class="section-body slate" style="padding-top: 6px;">
+        <div class="week-block">
+          <div class="week-label">Week 1</div>
+          <div class="week-focus">Fix the resume first</div>
+          <ul class="week-actions">
+            <li>Rewrite all resume bullets to add quantified outcomes</li>
+            <li>Add one AI workflow example to your experience section</li>
+            <li>Update LinkedIn to mirror the resume changes</li>
+          </ul>
+        </div>
+        <div class="week-block">
+          <div class="week-label">Weeks 2–3</div>
+          <div class="week-focus">SQL fundamentals</div>
+          <ul class="week-actions">
+            <li>Complete Mode Analytics SQL tutorial (free, ~6 hours)</li>
+            <li>Build the retention cohort analysis project</li>
+            <li>Write up findings as a LinkedIn post or short case study</li>
+          </ul>
+        </div>
+        <div class="week-block">
+          <div class="week-label">Week 4</div>
+          <div class="week-focus">AI sprint + apply</div>
+          <ul class="week-actions">
+            <li>Run the AI-assisted discovery sprint project</li>
+            <li>Update resume with new skills and projects</li>
+            <li>Re-run Koalafied on this same JD — see your new score</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOWNLOAD -->
+    <div class="download-section">
+      <button class="download-btn">↓ Download as PDF</button>
+      <p class="download-note">Opens browser print dialog — choose Save as PDF</p>
+    </div>
+
+  </div>
+
+</body>
+</html>

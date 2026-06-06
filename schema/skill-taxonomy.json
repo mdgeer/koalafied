@@ -1,0 +1,405 @@
+{
+  "version": "1.2",
+  "last_updated": "2026-06-05",
+  "sample_size": 76,
+  "sample_notes": "Combined from two research passes. Pass 1: ~25 JDs from company career pages and Greenhouse/Lever postings (Figma, Anthropic, Stripe, GitLab, G-P, Google, Meta, DoorDash, etc.). Pass 2: 51 LinkedIn JDs collected by the operator, split roughly 26 from a 'product manager' search and 25 from an 'AI product manager' search. The deliberate 50/50 split means AI frequencies reflect a blended view of the market rather than being inflated by AI-only sources. Update cadence: twice per year (January and July). Next update: 2027-01.",
+  "total_weight": 100,
+  "scoring": {
+    "formula": "sum(category_weight × match_level) / total_weight × 100",
+    "match_levels": {
+      "strong": {
+        "value": 1.0,
+        "description": "Explicitly demonstrated in resume with concrete evidence — named skill, quantified outcome, or described experience that clearly maps to this category at a proficient or above depth level."
+      },
+      "ambiguous": {
+        "value": 0.5,
+        "description": "Present but underdemonstrated — skill is mentioned or implied but lacks supporting evidence, specificity, or context that confirms depth. Foundational-only evidence on a category that the JD requires at advanced depth counts as ambiguous."
+      },
+      "gap": {
+        "value": 0,
+        "description": "Not present in resume, or explicitly required by the JD with no corresponding evidence in the resume."
+      }
+    },
+    "notes": [
+      "Match level is assessed per category, not per individual skill within a category.",
+      "A category is 'strong' when the resume demonstrates at least 2-3 skills within it with concrete evidence at proficient or above depth.",
+      "A category is 'ambiguous' when the resume touches on skills in the category but without specificity, quantification, or enough context to confirm real depth.",
+      "A category is 'gap' when the JD clearly requires skills in that category and the resume has no evidence at any depth level.",
+      "JD requirements should be mapped to taxonomy categories before resume matching — only score categories the JD actually requires.",
+      "If a JD does not explicitly require a category, that category receives full weight at the ambiguous level as a baseline (presence assumed but unverified).",
+      "Use depth_levels within each category to calibrate match level — foundational evidence for a senior-level JD should be scored as ambiguous, not strong."
+    ]
+  },
+  "categories": [
+    {
+      "id": "product_strategy_execution",
+      "name": "Product Strategy & Execution",
+      "weight": 17,
+      "description": "Owning a roadmap, making prioritization decisions, setting product direction, defining success metrics, and shipping against a strategy. The most universally required PM competency — present in nearly every JD at every level.",
+      "skills": [
+        "Roadmap development and prioritization",
+        "Strategic vision setting",
+        "OKR / KPI definition and tracking",
+        "Go-to-market planning and execution",
+        "Business case development",
+        "Competitive analysis and market research"
+      ],
+      "frequency_pct": 98,
+      "jd_frequency_raw": "74/76 JDs (combined sample)",
+      "level_notes": "Universal across all levels. Scope scales: APM prioritizes features within a sprint; PM II owns a product area roadmap; Senior PM owns a product pillar; Staff/Principal owns multi-team strategy; Director owns business-unit product strategy.",
+      "company_notes": "Universal. Startup language: 'ruthless prioritization,' 'zero-to-one,' 'founder mindset.' Enterprise language: 'roadmap management across multiple stakeholders,' 'strategic alignment with corporate goals.'",
+      "example_jd_language": [
+        "Own the roadmap for [product area], including the prioritization decisions and the stakeholder communication",
+        "Develop the long-term vision and strategy for your pillar and create and execute on a compelling roadmap",
+        "Prioritizing ruthlessly, including declining requests from senior leadership",
+        "Define and track key performance indicators (KPIs) for [product area]",
+        "Conduct market and competitive analysis for product positioning",
+        "Use metrics to inform your point of view and leverage analytics to measure success"
+      ],
+      "depth_levels": {
+        "foundational": "Contributes to roadmap discussions; understands prioritization concepts; writes user stories and tickets; tracks progress against existing OKRs set by others.",
+        "proficient": "Owns a feature-level or product area roadmap; applies prioritization frameworks (RICE, ICE, MoSCoW) to real decisions; defines OKRs for a product area; runs competitive analysis; communicates roadmap tradeoffs to stakeholders.",
+        "advanced": "Owns a product pillar or multi-team roadmap; drives multi-quarter strategy with clear rationale; makes hard tradeoff calls independently; builds product vision with a compelling narrative; aligns strategy to business outcomes.",
+        "expert": "Owns business-unit level strategy; defines product direction across multiple teams; sets organizational prioritization standards; connects product strategy to company P&L and market positioning."
+      },
+      "resume_signals": {
+        "strong": ["Owned roadmap for a named product or area", "Named and quantified KPIs or OKRs", "Shipped specific products with measurable outcomes", "Described prioritization process or framework applied to real decisions"],
+        "ambiguous": ["Mentions roadmap or strategy without specifics", "Lists metrics without describing how they were defined or used", "References competitive awareness without demonstrating it"],
+        "gap": ["No roadmap ownership mentioned", "No evidence of owning decisions or setting direction", "Execution-only framing with no strategic component"]
+      }
+    },
+    {
+      "id": "data_fluency_analytics",
+      "name": "Data Fluency & Experimentation",
+      "weight": 15,
+      "description": "Using data to drive product decisions, designing and running experiments, and measuring impact rigorously. Ranges from reading dashboards (foundational) to writing SQL and designing experimentation programs (advanced). The most commonly cited differentiator between strong and weak PM candidates in JD language.",
+      "skills": [
+        "SQL / data querying",
+        "A/B testing and experimentation design",
+        "Product analytics tools (Amplitude, Mixpanel, Heap)",
+        "Behavioral analytics tools (Hotjar, FullStory, heatmaps)",
+        "BI and experimentation tools (Looker, Tableau, Optimizely, Statsig, LaunchDarkly)",
+        "Metrics definition, tracking, and interpretation",
+        "Data-driven decision making"
+      ],
+      "frequency_pct": 88,
+      "jd_frequency_raw": "~67/76 JDs (combined sample)",
+      "level_notes": "APM: interprets dashboards, reads analytics. PM II: defines KPIs, runs experiments using tools. Senior: designs measurement strategy, self-serves via SQL or BI tools. Staff/Principal: owns experimentation program design. Director: sets data culture standards.",
+      "company_notes": "Near-universal. Growth and startup companies expect self-serve SQL analysis. Enterprise may accept BI tool fluency in place of SQL. Consumer and marketplace roles weight experimentation most heavily. B2B SaaS roles weight KPI ownership most heavily.",
+      "example_jd_language": [
+        "Strong data fluency: comfortable pulling your own analysis in SQL or a BI tool",
+        "Designing and running A/B tests and other experiments to validate hypotheses",
+        "Strong analytical capabilities with experience defining and tracking success metrics, running experiments, and using data to measure product impact on revenue, conversion, and margins",
+        "Analyze product metrics and user feedback to identify opportunities and optimize",
+        "Managing high-velocity experiment programs (4+ per month)",
+        "Proficiency in analytics tools such as Amplitude, Mixpanel, or Looker"
+      ],
+      "depth_levels": {
+        "foundational": "Reads and interprets dashboards and analytics tools (Amplitude, Mixpanel, Google Analytics); uses heatmap and session replay tools (Hotjar, FullStory) to understand user behavior; understands what metrics mean but doesn't define them independently.",
+        "proficient": "Sets up and interprets A/B tests using experimentation tools (Optimizely, Convert.com, Statsig, LaunchDarkly, or platform-native flags); defines and owns feature-level KPIs; tracks metric impact after launch; can query in BI tools with limited or no SQL; understands statistical significance at a working level.",
+        "advanced": "Writes SQL to self-serve analysis independently without waiting on a data analyst; designs experiment frameworks including sample size calculation and significance thresholds; identifies and controls for confounding variables; owns measurement strategy for a full product area; translates raw data into product decisions.",
+        "expert": "Builds or oversees experimentation programs across teams; defines company-wide metrics standards; contributes to data infrastructure or tooling decisions; runs multi-armed bandits or advanced experiment designs; coaches other PMs on measurement strategy."
+      },
+      "resume_signals": {
+        "strong": ["Named specific analytics tools with concrete usage context", "Described A/B tests designed, run, or interpreted", "Quantified outcomes tied to data analysis", "Explicitly mentions SQL or describes self-serve data work"],
+        "ambiguous": ["Mentions 'data-driven' without supporting examples", "Lists analytics tools without describing how they were used", "References metrics without describing analysis approach"],
+        "gap": ["No mention of data, metrics, or analysis", "Outputs described without any measurement", "No evidence of engaging with analytics at any depth"]
+      }
+    },
+    {
+      "id": "cross_functional_collaboration",
+      "name": "Cross-Functional Collaboration",
+      "weight": 13,
+      "description": "Working effectively across engineering, design, data, sales, legal, and other functions. Managing stakeholders. Aligning teams and driving decisions without direct authority. The single most universally required PM competency — present in every JD reviewed.",
+      "skills": [
+        "Engineering partnership (technical collaboration, tradeoff discussions)",
+        "Stakeholder management and alignment",
+        "Cross-functional coordination (design, data, legal, marketing, finance)",
+        "Working with sales, customer success, and GTM teams",
+        "Influence without authority"
+      ],
+      "frequency_pct": 100,
+      "jd_frequency_raw": "76/76 JDs (combined sample)",
+      "level_notes": "Universal at every level. Partner scope widens with seniority: APM collaborates with eng + design; PM II adds data and marketing; Senior adds legal, finance, sales; Director adds executive leadership and cross-org coordination.",
+      "company_notes": "Universal. B2B SaaS and enterprise use formal stakeholder management language. Startups emphasize speed and small teams. Remote-first companies (e.g. GitLab) explicitly require strong async cross-functional communication.",
+      "example_jd_language": [
+        "Collaborate with engineering, design, legal, and other teams to jointly shape product experiences",
+        "High effectiveness in managing cross-functional teams through influence rather than authority",
+        "Drive stakeholder alignment through presenting trade-offs and data-informed recommendations",
+        "Align cross-functional stakeholders on roadmap decisions, tradeoffs, and timelines",
+        "Manage diverse stakeholders (Engineering, Design, Sales, Marketing, Executive Leadership)"
+      ],
+      "depth_levels": {
+        "foundational": "Works within a cross-functional team; attends syncs; keeps engineering and design informed of changes; escalates conflicts rather than resolving them.",
+        "proficient": "Coordinates across design, engineering, and data to drive a feature from discovery to launch; manages expectations proactively; resolves cross-functional disagreements using data and shared goals; runs alignment meetings effectively.",
+        "advanced": "Aligns senior stakeholders (director-level and above) on hard decisions with competing priorities; navigates organizational politics; coordinates dependencies across multiple teams and business units; manages executive-level communication without escalation.",
+        "expert": "Drives organizational alignment on strategic direction; shapes cross-org processes and ways of working; builds coalitions across senior leadership; resolves company-level tradeoffs."
+      },
+      "resume_signals": {
+        "strong": ["Named cross-functional partners and described the collaboration concretely", "Examples of resolving cross-functional conflict or navigating competing priorities", "Evidence of stakeholder alignment on hard decisions with measurable outcomes"],
+        "ambiguous": ["Generically mentions working with 'cross-functional teams' without detail", "Lists partners without describing the working relationship or outcomes"],
+        "gap": ["Solo or siloed work descriptions only", "No evidence of managing competing priorities across teams", "No mention of stakeholder communication or alignment"]
+      }
+    },
+    {
+      "id": "communication_influence",
+      "name": "Communication & Influence",
+      "weight": 11,
+      "description": "Communicating clearly in writing and presentations; writing crisp PRDs, specs, and strategy docs; presenting to executives; translating complex concepts for varied audiences; persuading without authority.",
+      "skills": [
+        "Written communication (PRDs, specs, strategy documents, memos)",
+        "Executive and stakeholder presentation",
+        "Translating technical concepts for non-technical audiences",
+        "Storytelling and narrative construction",
+        "Async written communication for distributed teams"
+      ],
+      "frequency_pct": 100,
+      "jd_frequency_raw": "~76/76 JDs (combined sample)",
+      "level_notes": "Universal. Quality bar scales: APM writes clear user stories; PM II writes crisp PRDs; Senior writes strategy docs with clear rationale; Staff/Principal writes authoritative product briefs; Director communicates to exec team and board.",
+      "company_notes": "Universal. Remote-first companies (GitLab) explicitly require strong async written communication. Enterprise emphasizes formal presentation skills. FAANG values tight, direct, evidence-backed communication. Startup: writes docs that move teams fast.",
+      "example_jd_language": [
+        "Strong written and verbal communication skills, with a knack for precise and concise articulation of user problems",
+        "Write requirements that an engineer or designer can act on without a follow-up meeting",
+        "Outstanding communication skills with experience presenting to executive teams",
+        "Translate technical jargon into understandable terms for non-technical stakeholders",
+        "Clear written communication; PRDs and strategy docs requiring minimal interpretation",
+        "Expertise in creating PRDs, strategy documents, and specifications"
+      ],
+      "depth_levels": {
+        "foundational": "Writes clear user stories and tickets; communicates status updates in writing; participates in meetings but doesn't lead them.",
+        "proficient": "Writes crisp PRDs and feature specs that teams can act on without follow-up; facilitates cross-functional meetings effectively; adjusts communication style by audience; can explain technical concepts to non-technical stakeholders.",
+        "advanced": "Writes authoritative strategy documents and product briefs; presents convincingly to VP or director-level stakeholders; builds narratives that align teams around a direction; translates complex systems or AI concepts for executive or non-technical audiences.",
+        "expert": "Communicates at exec and board level; writes memos that drive org-wide decisions; coaches other PMs on communication; builds organizational communication standards."
+      },
+      "resume_signals": {
+        "strong": ["Named specific artifacts produced (PRD, strategy brief, product memo)", "Evidence of executive-level presentations or alignment wins", "Examples of translating technical or complex work for non-technical stakeholders"],
+        "ambiguous": ["'Strong communicator' or 'excellent communication skills' without supporting examples", "Mentions writing without naming the artifacts or audience"],
+        "gap": ["No evidence of written artifacts produced", "No examples of communicating to senior leadership or cross-functional audiences"]
+      }
+    },
+    {
+      "id": "discovery_user_empathy",
+      "name": "Product Discovery & User Empathy",
+      "weight": 10,
+      "description": "Running user research, building genuine customer empathy, synthesizing insights into product direction, and bringing design sensibility to product decisions.",
+      "skills": [
+        "User research (interviews, usability testing, surveys, observation)",
+        "Customer empathy and user advocacy",
+        "Design sense and UX intuition",
+        "Translating qualitative insights into product requirements",
+        "Customer journey mapping and pain point analysis"
+      ],
+      "frequency_pct": 94,
+      "jd_frequency_raw": "~71/76 JDs (combined sample)",
+      "level_notes": "APM assists research; PM II conducts research with guidance; Senior leads discovery strategy and synthesizes across user segments; Staff/Principal establishes discovery frameworks for teams.",
+      "company_notes": "Near-universal. Startups often require independent research without a dedicated research function. Enterprise may have dedicated UX research teams. Design-tool companies (Figma, Notion), consumer apps (Duolingo), and B2C companies weight this most heavily.",
+      "example_jd_language": [
+        "Experience running user research independently, not only using insights generated by a research team",
+        "Build deep user empathy with both merchants and financial partners",
+        "Sincere empathy for the customer and commitment to delving deep into challenges",
+        "Conduct user research to understand customer needs and pain points",
+        "Deep understanding and empathy for users",
+        "UX expertise and champion the end-user perspective"
+      ],
+      "depth_levels": {
+        "foundational": "Participates in user research sessions run by others; reads and synthesizes research reports; understands user personas and uses them in planning; observes customer behavior in support tickets, reviews, or usage data.",
+        "proficient": "Conducts user interviews independently; synthesizes qualitative feedback into actionable themes; runs usability tests on prototypes; combines user feedback with analytics to validate hypotheses; builds customer empathy firsthand.",
+        "advanced": "Designs and runs end-to-end research programs; combines qualitative and quantitative methods; establishes regular user research cadences; defines Jobs-to-be-Done or continuous discovery processes for a product area.",
+        "expert": "Establishes discovery frameworks and research culture for teams; runs large-scale customer research programs; develops user insight into product strategy across a business unit or platform."
+      },
+      "resume_signals": {
+        "strong": ["Named research methods used (interviews, usability tests, surveys)", "Described how user insights directly influenced product decisions", "Evidence of ongoing customer engagement or feedback loops owned"],
+        "ambiguous": ["Mentions user feedback without describing the research process", "References 'customer-centric' approach without concrete examples"],
+        "gap": ["No mention of user research or customer discovery", "Feature-first framing with no evidence of customer validation at any stage"]
+      }
+    },
+    {
+      "id": "technical_acumen",
+      "name": "Technical Acumen",
+      "weight": 8,
+      "description": "Working credibly with engineers, understanding technical tradeoffs and system design, and adapting to Agile processes. Distinct from AI-specific knowledge (see ai_product_expertise category).",
+      "skills": [
+        "Technical depth (architecture, APIs, system design, tradeoffs)",
+        "Agile / Scrum methodology",
+        "Domain or industry knowledge (fintech, healthtech, B2B SaaS, developer tools, etc.)",
+        "API / platform / developer tools experience",
+        "Understanding build vs. buy vs. configure tradeoffs"
+      ],
+      "frequency_pct": 86,
+      "jd_frequency_raw": "~65/76 JDs (combined sample)",
+      "level_notes": "APM: follows technical discussions, understands basic concepts. PM: works effectively with engineering, participates in design reviews. Senior: discusses architecture tradeoffs. Staff/Principal: contributes to technical direction. Director: makes strategic technology decisions.",
+      "company_notes": "Strongest at FAANG, developer-tool companies (Figma, Stripe, GitLab), and infrastructure-focused companies. Still required but softer at enterprise non-tech-product roles. Domain knowledge becomes more explicit at Senior PM and above.",
+      "example_jd_language": [
+        "Strong technical depth to discuss architecture tradeoffs and system design with engineers",
+        "Experience with agile development methodologies and modern product tools",
+        "Deep familiarity with cloud platforms, SaaS business models, microservices, and serverless architecture",
+        "Experience driving growth for API, developer platform, or technical/usage-based products",
+        "Technical background or ability to work effectively with engineering teams"
+      ],
+      "depth_levels": {
+        "foundational": "Understands basic software development concepts (frontend vs. backend, APIs, databases at a high level); can follow technical discussions without derailing them; knows what Agile/Scrum is and operates within it.",
+        "proficient": "Understands system architecture at a working level; participates meaningfully in technical design reviews; evaluates build vs. buy vs. configure decisions; understands performance, security, and scalability implications as product constraints; runs sprints and manages backlogs fluently.",
+        "advanced": "Discusses tradeoffs in architecture, database design, API design, and system performance with engineers; contributes to technical direction; evaluates infrastructure decisions from a product perspective; brings relevant domain knowledge (industry-specific systems, compliance, data models).",
+        "expert": "Makes complex architectural tradeoff decisions alongside engineering leadership; defines technical PM standards; evaluates emerging technology capabilities for strategic application; contributes meaningfully to technical hiring or standards decisions."
+      },
+      "resume_signals": {
+        "strong": ["Named technical systems, APIs, or architectural patterns worked with in a product context", "Evidence of contributing to technical design decisions", "Named domain expertise relevant to the JD (fintech, healthtech, developer tools, etc.)"],
+        "ambiguous": ["'Technical background' or 'works well with engineers' without specifics", "Lists tools or technologies without describing how they informed product decisions"],
+        "gap": ["No technical context in any role description", "No evidence of working directly with engineering on technical decisions"]
+      }
+    },
+    {
+      "id": "leadership_strategic_thinking",
+      "name": "Leadership & Strategic Thinking",
+      "weight": 7,
+      "description": "Setting long-term vision, navigating ambiguity, demonstrating business acumen, and (at Senior and above) developing other PMs and influencing organizational direction.",
+      "skills": [
+        "Strategic vision and long-term thinking (3-5 year horizon)",
+        "Comfort with ambiguity and operating in undefined spaces",
+        "Business acumen (P&L, unit economics, SaaS metrics: ARR, CAC, LTV, churn)",
+        "Mentoring and coaching other PMs",
+        "Organizational influence and program-level thinking"
+      ],
+      "frequency_pct": 80,
+      "jd_frequency_raw": "~61/76 JDs (combined sample)",
+      "level_notes": "Explicitly required from Senior PM and above. APM and mid-level PM benefit from demonstrating it, but it is rarely a hard requirement. Staff/Principal must own area vision and establish standards across teams. Director owns business-unit vision and people development.",
+      "company_notes": "Enterprise and large orgs call it out explicitly. Startup uses 'founder mindset' or 'comfort in the unknown.' FAANG frames it as 'organizational impact' and 'bar-raising.' B2B SaaS and fintech call out SaaS metrics and P&L literacy most explicitly.",
+      "example_jd_language": [
+        "Develop the long-term vision and strategy for your pillar",
+        "Ability to thrive in a fast-paced, ambiguous environment and turn ambiguity into clear product direction",
+        "Deep understanding of SaaS metrics including ARR, CAC, LTV, and churn analysis",
+        "Mentor and coach other product managers, sharing expertise and elevating the team",
+        "Senior PMs must think long-term and decide where their team should be in 3-5 years",
+        "Creating and communicating a clear, compelling vision aligned with long-term company goals"
+      ],
+      "depth_levels": {
+        "foundational": "Takes ownership of outcomes; communicates up proactively; shows initiative and follows through; begins to think beyond the immediate sprint.",
+        "proficient": "Navigates ambiguity to make decisions rather than waiting for direction; thinks in quarterly or annual goals; shows business awareness and connects product work to revenue or retention; contributes to team vision.",
+        "advanced": "Sets vision for a team or product area with a clear rationale and multi-year horizon; develops and mentors other PMs; builds business cases; leads teams through organizational change or undefined problems; owns SaaS or business metrics at an area level.",
+        "expert": "Sets business-unit vision; builds and develops PM organizations; owns P&L or significant revenue; shapes company-level strategy; represents the product function at executive and board levels."
+      },
+      "resume_signals": {
+        "strong": ["Described setting vision or direction for a team or area", "Named business metrics owned (ARR impact, churn reduction, LTV improvement)", "Evidence of mentoring, coaching, or developing other PMs", "Examples of leading through ambiguity or defining structure where none existed"],
+        "ambiguous": ["Mentions strategy without describing ownership", "'Thinks strategically' or similar phrase without examples"],
+        "gap": ["Execution-only framing at Senior+ level", "No evidence of owning direction or influencing beyond immediate team"]
+      }
+    },
+    {
+      "id": "ai_tool_fluency",
+      "name": "AI Tool Fluency",
+      "weight": 9,
+      "description": "Using AI tools as a regular part of PM work to move faster, think more clearly, and produce better outputs. Distinct from building AI products — this is about using AI as a productivity and research multiplier. Now appearing in the majority of PM job descriptions, including general PM roles, not just AI-specific ones.",
+      "skills": [
+        "Using LLM tools for PM work (Claude, ChatGPT, Gemini for research, synthesis, writing, analysis)",
+        "Prompt engineering for productivity (clear, effective prompting in daily work)",
+        "AI-assisted user research analysis (synthesizing feedback, themes, interview transcripts)",
+        "AI prototyping and exploration (v0, Cursor, Bolt, Replit, Claude Code for quick mockups and experiments)",
+        "AI-assisted competitive analysis and market research",
+        "Understanding of AI tool limitations (hallucinations, context limits, appropriate use cases)",
+        "Integrating AI tools into team workflows"
+      ],
+      "frequency_pct": 53,
+      "jd_frequency_raw": "~40/76 JDs (combined sample); 65% of LinkedIn sample, 28% of initial pass — LinkedIn JDs show much stronger signal",
+      "level_notes": "Emerging at all levels. Not yet a hard requirement in most JDs (still frequently 'preferred'), but increasingly a differentiator. At Senior and above, expected to model AI-assisted work practices and accelerate team adoption.",
+      "company_notes": "Explicit at AI-native companies (Anthropic, OpenAI, Figma AI Platform, G-P). Implied but not stated at most others. Rapidly becoming a baseline expectation across the market in 2025-2026.",
+      "example_jd_language": [
+        "Comfortable using AI tools to accelerate research, analysis, and communication",
+        "Uses AI to augment product work — research synthesis, writing, analysis, and ideation",
+        "Actively experiments with new AI tools and brings learnings back to the team",
+        "Experience incorporating generative AI into daily PM workflows",
+        "Ability to use AI coding assistants or prototyping tools to explore ideas independently"
+      ],
+      "depth_levels": {
+        "foundational": "Has tried ChatGPT or similar tools; uses AI occasionally for writing assistance or quick research; aware of major LLM tools but uses them inconsistently or at a surface level.",
+        "proficient": "Regularly uses multiple AI tools (LLMs, AI search, AI writing tools) as part of daily work; writes effective prompts that produce useful outputs; uses AI for research synthesis, competitive analysis, summarization, and first drafts; understands when AI output requires verification.",
+        "advanced": "Has systematically integrated AI into PM workflows — uses AI for user feedback analysis, interview synthesis, roadmap scenario modeling, or prototype exploration; teaches others on effective AI tool use; has used AI prototyping tools (v0, Cursor, Bolt, Replit, Claude Code) to build or explore product ideas independently without engineering support.",
+        "expert": "Actively shapes team and org AI tool adoption; evaluates new AI tools critically and makes adoption recommendations; has developed internal playbooks or workflows that leverage AI for PM work at scale; contributes to how the organization thinks about AI productivity."
+      },
+      "resume_signals": {
+        "strong": ["Named specific AI tools used in PM context with concrete outcomes", "Described AI-assisted workflows for research, synthesis, or analysis", "Evidence of building prototypes or experiments using AI tools independently"],
+        "ambiguous": ["Mentions AI or AI tools without describing how they were used in work context", "Generically states 'interested in AI' without evidence of active use"],
+        "gap": ["No mention of AI tools or AI-assisted workflows", "Resume predates AI tool availability without any acknowledgment of the current landscape"]
+      }
+    },
+    {
+      "id": "ai_product_expertise",
+      "name": "AI Product Expertise",
+      "weight": 10,
+      "description": "Understanding AI/ML concepts well enough to define, build, and ship AI-powered products. Includes knowing what evals are, how to measure AI quality, understanding LLMs and agents at a working level, and making AI product tradeoff decisions. This is the category most commonly called out in modern PM JDs and least commonly demonstrated in PM resumes — making it the highest-leverage area for Koalafied to address.",
+      "skills": [
+        "LLM fundamentals (how language models work, tokens, context windows, system prompts, hallucination)",
+        "AI product evaluation (evals, golden datasets, LLM-as-judge, quality metrics)",
+        "Agentic AI concepts (multi-step reasoning, tool use, memory, orchestration)",
+        "AI product tradeoffs (latency, cost, accuracy, safety, hallucination rate, fallback behavior)",
+        "Prompt engineering in product/engineering context (system prompts, few-shot examples, structured outputs)",
+        "AI safety and responsible AI as product requirements (bias, fairness, content policy, explainability)",
+        "Retrieval-Augmented Generation (RAG) concepts and when to apply vs. fine-tuning vs. prompting",
+        "AI product metrics (task completion rate, user acceptance, automation success, fallback rate)",
+        "Experience owning AI features from discovery through launch",
+        "Familiarity with AI model providers and ecosystem (OpenAI, Anthropic, Google, open-source models)"
+      ],
+      "frequency_pct": 57,
+      "jd_frequency_raw": "~43/76 JDs (combined sample); 59% of LinkedIn sample, 52% of initial pass",
+      "level_notes": "At APM/mid-level: familiarity and curiosity is sufficient. At Senior: expected to have shipped at least one AI feature or deeply engaged with AI development. At Staff/Principal: expected to define evaluation criteria and own AI quality measurement. At Director: expected to set AI product strategy and capability roadmap.",
+      "company_notes": "Near-universal at AI-native companies (Anthropic, Figma AI, G-P Agentic AI, GitLab AI Platform). Rapidly growing as 'preferred' at most others. Expect near-universal by 2026 across tech companies. Regulatory-sensitive industries (fintech, healthtech) add responsible AI and explainability requirements.",
+      "example_jd_language": [
+        "Passion for AI technology and its potential impact on products and society",
+        "Apply emerging technologies (e.g. LLMs) where they can meaningfully improve user experience",
+        "Understanding of how AI, LLMs, agents, tools, workflows, automation, and orchestration apply to enterprise SaaS",
+        "1 year of experience launching generative AI-powered products",
+        "Drive KPIs including adoption, task completion, answer quality, and automation success rate",
+        "AI Product Managers must have a strong grasp of AI and machine learning concepts",
+        "Experience defining evaluation criteria and quality metrics for AI model outputs",
+        "Deep familiarity with prompt engineering, fine-tuning, and RAG-based architectures"
+      ],
+      "depth_levels": {
+        "foundational": "Understands that AI is not magic; knows the difference between ML and LLMs at a conceptual level; can articulate what LLMs are good and bad at; has used AI features as an end user and can reason about the product experience.",
+        "proficient": "Can write a product brief for an AI feature with meaningful requirements; understands LLM tradeoffs (latency, cost, accuracy, hallucination) at a working level; has shipped at least one AI-powered feature or experiment; understands what evals are and why they matter even if hasn't built one; familiar with prompt engineering in a product context.",
+        "advanced": "Understands how to evaluate AI model and feature quality — has defined evaluation criteria, used golden datasets, or applied LLM-as-judge methods; knows the tradeoffs between RAG, fine-tuning, and prompting and when each applies; has owned AI product metrics (task completion, user acceptance, fallback rate); understands agentic AI concepts and their product implications; has shipped multiple AI features across the full product lifecycle.",
+        "expert": "Has built or owned AI evaluation frameworks and quality measurement programs; defines golden datasets and evaluation methodology for teams; operates LLM-as-judge systems; can make strategic AI capability decisions (build vs. partner vs. fine-tune); shapes AI product vision and platform strategy; has navigated AI safety, responsible AI, or regulatory requirements as product constraints."
+      },
+      "resume_signals": {
+        "strong": ["Named AI product shipped with described scope and outcomes", "Described evaluation methodology or quality measurement for AI outputs", "Named LLM concepts (evals, RAG, agents, prompting) in product context", "Evidence of owning AI-specific product metrics (task completion, automation success, hallback rate)"],
+        "ambiguous": ["Mentions AI or ML in a job title or team context without describing personal contributions", "'Worked on AI features' without specifics", "Expresses interest in AI without evidence of hands-on product experience"],
+        "gap": ["No mention of AI product work at any level", "All product experience predates AI/LLM era with no bridge or learning narrative", "JD explicitly requires AI product experience and resume has no supporting evidence"]
+      }
+    }
+  ],
+  "weighting_rationale": {
+    "product_strategy_execution": "17 points — present in ~98% of JDs, closest to the core definition of PM work. Inability to prioritize and drive a roadmap is disqualifying regardless of other strengths.",
+    "data_fluency_analytics": "15 points — near-universally required and the single most commonly cited differentiator between strong and weak PM candidates in JD language.",
+    "cross_functional_collaboration": "13 points — universal requirement but slightly less distinguishing, since most candidates describe some cross-functional work even if superficially.",
+    "communication_influence": "11 points — effectively universal (100% of LinkedIn sample). Slightly reduced vs. v1.1 to fund AI categories; weight reflects that communication evidence often surfaces in how the resume itself is written.",
+    "discovery_user_empathy": "10 points — near-universal (94%) but less emphasized at senior levels where it becomes assumed rather than explicitly called out.",
+    "technical_acumen": "8 points — important and growing, but highly role-type dependent. A consumer-focused PM at a large company is rarely penalized for not discussing system architecture.",
+    "leadership_strategic_thinking": "7 points — explicit requirement only from Senior PM and above. Slightly reduced vs. v1.1 to fund AI categories; still weighted to reflect real impact on senior-level fit.",
+    "ai_tool_fluency": "9 points — raised from 6 (v1.1) based on LinkedIn data showing 65% explicit mention rate in a broad PM sample including general PM roles. No longer a niche signal; approaching table stakes. Weight should increase further at next update if trajectory continues.",
+    "ai_product_expertise": "10 points — raised from 8 (v1.1). The highest-leverage category for Koalafied's value proposition. PMs encounter these requirements in JDs and often don't know what 'evals,' 'agentic AI,' or 'RAG' mean or how to close the gaps. This is where the tool's learning path and resource recommendations create the most unique user value.",
+    "domain_expertise_note": "Domain / vertical expertise (healthcare, fintech, education, legal) appeared in ~43% of the LinkedIn sample but is NOT a weighted taxonomy category for MVP. It will surface as a flag in the report narrative rather than a scored category. Post-MVP: revisit once JD volume grows and patterns can be assessed at scale."
+  },
+  "level_calibration": {
+    "note": "When matching a resume against a JD, consider the stated level. The same resume may score differently against an APM JD vs. a Staff PM JD because the evidence bar for each category shifts. Use depth_levels within each category to calibrate whether evidence is strong, ambiguous, or a gap for the target level.",
+    "levels": {
+      "apm_entry": {
+        "label": "APM / Entry-Level PM (0-2 years)",
+        "calibration_notes": "Lower evidence bar across all categories. Potential, trajectory, and learning agility are valid evidence. Focus on data fluency and communication as primary differentiators. AI Tool Fluency can be a strong signal at this level. AI Product Expertise at foundational depth is sufficient."
+      },
+      "mid_level": {
+        "label": "PM / PM II (2-5 years)",
+        "calibration_notes": "Full evidence expected across core categories at a solid but not exceptional bar. Strategy, data, and cross-functional collaboration are the primary fit signals. AI Tool Fluency at proficient is increasingly expected. AI Product Expertise at foundational-to-proficient."
+      },
+      "senior": {
+        "label": "Senior PM (5-8 years)",
+        "calibration_notes": "Strong evidence expected on strategy, data, stakeholder management, and communication. Leadership and strategic thinking transition from 'nice to have' to 'expected.' Technical acumen and AI Product Expertise become stronger differentiators. AI Tool Fluency at proficient-to-advanced."
+      },
+      "staff_principal": {
+        "label": "Staff / Principal PM (8+ years)",
+        "calibration_notes": "Near-strong evidence expected across all categories. Leadership and strategic thinking become primary fit signals alongside cross-functional influence at program scale. AI Product Expertise at advanced — including evaluation methodology — is a near-requirement for AI-native companies."
+      },
+      "director": {
+        "label": "Director of Product",
+        "calibration_notes": "Leadership and strategic thinking receive near-equal weight to strategy and cross-functional categories. Business acumen, vision setting, team development, and AI strategy ownership are the primary differentiators."
+      }
+    }
+  }
+}

@@ -1,0 +1,493 @@
+---
+export const prerender = false;
+
+import BaseHead from "@/layouts/BaseHead.astro";
+import StarRating from "@/components/koalafied/StarRating";
+import { resources } from "@/data/koalafied/resources.js";
+import { reportKey, redis } from "@/lib/redis";
+import type { Report, ReportResourceItem } from "@/lib/types";
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect("/koalafied/");
+
+const report = await redis.get<Report>(reportKey(id));
+
+// ─── Display helpers ──────────────────────────────────────────────────────────
+
+const TIER_COLOR: Record<string, string> = {
+  strong_fit: "#16a34a",
+  borderline:  "#d97706",
+  not_ready:   "#dc2626",
+};
+const TIER_BG: Record<string, string> = {
+  strong_fit: "#dcfce7",
+  borderline:  "#fef3c7",
+  not_ready:   "#fee2e2",
+};
+const TIER_LABEL: Record<string, string> = {
+  strong_fit: "Strong Fit",
+  borderline:  "Borderline",
+  not_ready:   "Not Ready",
+};
+const SEVERITY: Record<string, { bg: string; color: string; label: string }> = {
+  minor:       { bg: "#f3e8ff", color: "#7c3aed", label: "Minor gap" },
+  moderate:    { bg: "#fff7ed", color: "#c2410c", label: "Moderate gap" },
+  significant: { bg: "#fee2e2", color: "#b91c1c", label: "Significant gap" },
+};
+const AI_LEVEL: Record<string, string> = {
+  just_starting:           "Just Starting",
+  comfortable_with_basics: "Comfortable with Basics",
+  intermediate:            "Intermediate",
+  advanced:                "Advanced",
+};
+
+// ─── Resource resolution ──────────────────────────────────────────────────────
+
+type ResolvedResource = ReportResourceItem & {
+  url: string;
+  is_free: boolean;
+  certificate_note: string | null;
+};
+
+function resolveResource(item: ReportResourceItem): ResolvedResource {
+  const r = resources[item.resource_key as keyof typeof resources] as (typeof resources)[keyof typeof resources] | undefined;
+  return {
+    ...item,
+    url:              r?.url              ?? "#",
+    is_free:          r?.is_free          ?? false,
+    certificate_note: r?.certificate_note ?? null,
+  };
+}
+
+function groupBySkill(items: ResolvedResource[]): [string, ResolvedResource[]][] {
+  const map = new Map<string, ResolvedResource[]>();
+  for (const item of items) {
+    if (!map.has(item.skill_label)) map.set(item.skill_label, []);
+    map.get(item.skill_label)!.push(item);
+  }
+  return Array.from(map.entries());
+}
+
+// ─── Computed values ──────────────────────────────────────────────────────────
+
+const tc    = report ? (TIER_COLOR[report.scoring.tier] ?? "#374151") : "#374151";
+const tbg   = report ? (TIER_BG[report.scoring.tier]    ?? "#f3f4f6") : "#f3f4f6";
+const tlbl  = report ? (TIER_LABEL[report.scoring.tier] ?? report.scoring.tier) : "";
+const barW  = report ? `${Math.max(4, report.scoring.overall_score)}%` : "0%";
+const headline = report ? [report.metadata.role_title, report.metadata.company_name].filter(Boolean).join(" — ") : "";
+const enrichedResources = report ? report.sections.resources.items.map(resolveResource) : [];
+const resourceGroups    = groupBySkill(enrichedResources);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={report ? `Your Koalafied Report — ${report.metadata.role_title}` : "Report Expired — Koalafied"}
+      description="Your personalized PM fit analysis."
+      noindex={true}
+    />
+    <style>
+      @media print {
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .rpt-section { break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;color:#1a1a1a;">
+
+    <!-- Sticky header -->
+    <div class="no-print" style="background:#1a1a1a;color:white;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;">
+      <a href="/koalafied/" style="color:white;text-decoration:none;font-size:18px;font-weight:700;letter-spacing:-0.5px;">Koalafied</a>
+      {report && (
+        <button onclick="window.print()" style="background:white;color:#1a1a1a;border:none;padding:8px 18px;font-size:13px;font-weight:700;border-radius:5px;cursor:pointer;font-family:inherit;">
+          ↓ Save as PDF
+        </button>
+      )}
+    </div>
+
+    <!-- ═══ EXPIRED ═══════════════════════════════════════════════════════════ -->
+    {!report && (
+      <div>
+        <div style="background:#1a1a1a;color:white;text-align:center;padding:72px 24px 56px;">
+          <h1 style="font-size:34px;font-weight:700;letter-spacing:-0.5px;margin:0 0 14px;">This report has expired</h1>
+          <p style="font-size:17px;color:#9ca3af;max-width:480px;margin:0 auto;line-height:1.6;">
+            Koalafied reports are stored for 30 days. This one has expired — but you can run a fresh analysis anytime.
+          </p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;min-height:40vh;padding:48px 24px;">
+          <div style="text-align:center;max-width:480px;">
+            <p style="font-size:15px;color:#6b7280;margin-bottom:28px;line-height:1.6;">
+              Paste your resume and a new job description — the analysis is free and takes about 30 seconds. Your results will be emailed to you.
+            </p>
+            <a href="/koalafied/" style="display:inline-block;background:#1a1a1a;color:white;text-decoration:none;padding:16px 36px;border-radius:7px;font-size:16px;font-weight:700;">
+              Run a new analysis →
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- ═══ FULL REPORT ════════════════════════════════════════════════════════ -->
+    {report && (
+      <div>
+
+        <!-- Score hero -->
+        <div style="background:white;border-bottom:2px solid #e5e7eb;padding:36px 24px;">
+          <div style="max-width:800px;margin:0 auto;">
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:4px;">
+              {report.metadata.jd_level.replace(/_/g," ")}
+            </div>
+            <div style="font-size:26px;font-weight:700;margin-bottom:22px;line-height:1.2;">{headline}</div>
+
+            <!-- Score + bar -->
+            <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;">
+              <div>
+                <div style={`font-size:54px;font-weight:700;line-height:1;color:${tc};`}>{report.scoring.overall_score}</div>
+                <div style="font-size:13px;color:#9ca3af;margin-top:2px;">Overall fit score</div>
+              </div>
+              <div style="flex:1;min-width:120px;">
+                <div style="background:#e5e7eb;border-radius:999px;height:14px;overflow:hidden;">
+                  <div style={`background:${tc};height:14px;border-radius:999px;width:${barW};`} />
+                </div>
+                <div style={`display:inline-block;margin-top:8px;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:700;background:${tbg};color:${tc};`}>
+                  {tlbl}
+                </div>
+              </div>
+            </div>
+
+            <!-- Pills -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              {report.scoring.strong_count > 0 && (
+                <span style="padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;background:#dcfce7;color:#16a34a;">
+                  ● {report.scoring.strong_count} Strong match{report.scoring.strong_count !== 1 ? "es" : ""}
+                </span>
+              )}
+              {report.scoring.ambiguous_count > 0 && (
+                <span style="padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;background:#fef3c7;color:#d97706;">
+                  ● {report.scoring.ambiguous_count} Ambiguous area{report.scoring.ambiguous_count !== 1 ? "s" : ""}
+                </span>
+              )}
+              {report.scoring.gap_count > 0 && (
+                <span style="padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;background:#fee2e2;color:#dc2626;">
+                  ● {report.scoring.gap_count} Gap{report.scoring.gap_count !== 1 ? "s" : ""}
+                </span>
+              )}
+              {report.sections.ai_assessment.required_tier !== "not_required" && (
+                <span style="padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;background:#dbeafe;color:#1d4ed8;">
+                  ● AI skills required
+                </span>
+              )}
+            </div>
+
+            <p style="font-size:12px;color:#9ca3af;margin-top:16px;line-height:1.5;">
+              This score reflects resume-to-JD text alignment only — not likelihood of getting hired. It's a directional data point, not a verdict.
+            </p>
+          </div>
+        </div>
+
+        <!-- Section cards -->
+        <div style="max-width:800px;margin:0 auto;padding:24px 24px 60px;">
+
+          <!-- 01 — Fit Summary -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #64748b;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">01</div>
+                <div style="font-size:16px;font-weight:700;">Fit Summary</div>
+              </div>
+            </div>
+            <div style="padding:18px 22px 22px;border-left:5px solid #64748b;background:#f8fafc;">
+              <p style="font-size:15px;line-height:1.75;color:#374151;margin:0 0 20px;">{report.sections.fit_summary.narrative}</p>
+              <div style="display:flex;gap:32px;flex-wrap:wrap;">
+                {report.sections.fit_summary.top_strengths.length > 0 && (
+                  <div>
+                    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;font-weight:700;margin-bottom:8px;">Top Strengths</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      {report.sections.fit_summary.top_strengths.map((s) => (
+                        <span style="background:#dcfce7;color:#166534;padding:5px 12px;border-radius:4px;font-size:13px;font-weight:600;">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {report.sections.fit_summary.top_gaps.length > 0 && (
+                  <div>
+                    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;font-weight:700;margin-bottom:8px;">Top Gaps</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      {report.sections.fit_summary.top_gaps.map((g) => (
+                        <span style="background:#fee2e2;color:#991b1b;padding:5px 12px;border-radius:4px;font-size:13px;font-weight:600;">{g}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <!-- 02 — Strengths -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #16a34a;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">02</div>
+                <div style="font-size:16px;font-weight:700;">Where You're Strong</div>
+              </div>
+              <span style="padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;background:#dcfce7;color:#16a34a;">
+                {report.sections.strengths.items.length} match{report.sections.strengths.items.length !== 1 ? "es" : ""}
+              </span>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #16a34a;background:#f0fdf4;">
+              {report.sections.strengths.items.length === 0 && (
+                <p style="font-size:14px;color:#6b7280;padding-top:12px;">No strong matches identified for this JD.</p>
+              )}
+              {report.sections.strengths.items.map((item) => (
+                <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-top:12px;background:white;">
+                  <div style="font-weight:700;font-size:15px;margin-bottom:6px;">{item.category_name}</div>
+                  <div style="font-size:14px;color:#374151;line-height:1.65;">{item.explanation}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- 03 — Ambiguous Areas -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #d97706;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">03</div>
+                <div style="font-size:16px;font-weight:700;">Ambiguous Areas</div>
+              </div>
+              <span style="padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;background:#fef3c7;color:#d97706;">
+                {report.sections.ambiguous_areas.items.length} area{report.sections.ambiguous_areas.items.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #d97706;background:#fffbeb;">
+              {report.sections.ambiguous_areas.items.length === 0 && (
+                <p style="font-size:14px;color:#6b7280;padding-top:12px;">No ambiguous areas identified.</p>
+              )}
+              {report.sections.ambiguous_areas.items.map((item) => (
+                <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-top:12px;background:white;">
+                  <div style="font-weight:700;font-size:15px;margin-bottom:6px;">{item.category_name}</div>
+                  <div style="font-size:14px;color:#374151;line-height:1.65;margin-bottom:8px;">{item.explanation}</div>
+                  <div style="font-size:13px;color:#b45309;font-weight:600;">{item.fix}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- 04 — Gaps -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #dc2626;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">04</div>
+                <div style="font-size:16px;font-weight:700;">Where You're Falling Short</div>
+              </div>
+              <span style="padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;background:#fee2e2;color:#dc2626;">
+                {report.sections.gaps.items.length} gap{report.sections.gaps.items.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #dc2626;background:#fff5f5;">
+              {report.sections.gaps.items.length === 0 && (
+                <p style="font-size:14px;color:#6b7280;padding-top:12px;">No clear gaps identified for this JD — strong result.</p>
+              )}
+              {report.sections.gaps.items.map((item) => {
+                const sev = SEVERITY[item.severity] ?? SEVERITY.moderate;
+                return (
+                  <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-top:12px;background:white;">
+                    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">{item.category_name}</div>
+                    <div style="font-size:14px;color:#374151;line-height:1.65;margin-bottom:8px;">{item.explanation}</div>
+                    <span style={`display:inline-block;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;background:${sev.bg};color:${sev.color};`}>{sev.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <!-- 05 — AI Assessment -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #2563eb;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">05</div>
+              <div style="font-size:16px;font-weight:700;">AI Skills Assessment</div>
+            </div>
+            <div style="padding:18px 22px 22px;border-left:5px solid #2563eb;background:#eff6ff;">
+              <!-- Callout -->
+              <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:7px;padding:16px 18px;margin-bottom:18px;">
+                <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:6px;">{report.sections.ai_assessment.required_tier_label}</div>
+                <div style="font-size:14px;color:#1e3a5f;line-height:1.6;">{report.sections.ai_assessment.required_tier_description}</div>
+              </div>
+              <!-- User level badge -->
+              {report.sections.ai_assessment.user_level_match !== "not_applicable" && (
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                  <span style="font-size:13px;color:#6b7280;">Your stated level:</span>
+                  <span style={`font-size:13px;font-weight:600;padding:3px 12px;border-radius:999px;background:${report.sections.ai_assessment.user_level_match === "below" ? "#fee2e2" : "#dcfce7"};color:${report.sections.ai_assessment.user_level_match === "below" ? "#b91c1c" : "#166534"};`}>
+                    {AI_LEVEL[report.quiz.ai_skill_level] ?? report.quiz.ai_skill_level}
+                    {" — "}
+                    {report.sections.ai_assessment.user_level_match === "at" ? "meets requirement" : report.sections.ai_assessment.user_level_match === "above" ? "exceeds requirement" : "below requirement"}
+                  </span>
+                </div>
+              )}
+              <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 12px;">{report.sections.ai_assessment.gap_narrative}</p>
+              <p style="font-size:14px;color:#374151;line-height:1.7;margin:0;">{report.sections.ai_assessment.specific_guidance}</p>
+            </div>
+          </div>
+
+          <!-- 06 — Learning Path -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #7c3aed;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">06</div>
+              <div style="font-size:16px;font-weight:700;">Your Learning Path</div>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #7c3aed;background:#faf5ff;">
+              {report.sections.learning_path.items.map((item) => (
+                <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-top:12px;background:white;">
+                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;margin-bottom:4px;">
+                    Priority {item.priority} · {item.time_estimate}
+                  </div>
+                  <div style="font-weight:700;font-size:15px;margin-bottom:6px;">{item.skill_label}</div>
+                  <div style="font-size:14px;color:#374151;line-height:1.65;">{item.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- 07 — Resources -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #7c3aed;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">07</div>
+              <div style="font-size:16px;font-weight:700;">Where to Learn</div>
+            </div>
+            <div style="padding:18px 22px 22px;border-left:5px solid #7c3aed;background:#faf5ff;">
+              <!-- FTC disclosure -->
+              <div style="background:#f9fafb;border:1px dashed #d1d5db;border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:#9ca3af;line-height:1.55;">
+                Some links are affiliate links. We may earn a commission if you enroll — at no extra cost to you. Resources are selected based on relevance to your gaps. We haven't personally tested every recommendation — do your own research before purchasing.
+              </div>
+
+              {resourceGroups.map(([skillLabel, items]) => (
+                <div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;font-weight:700;margin:16px 0 8px;">
+                    For: {skillLabel}
+                  </div>
+                  {items.map((item) => (
+                    <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-bottom:10px;background:white;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+                      <div style="flex:1;">
+                        <div style="font-weight:700;font-size:15px;margin-bottom:5px;">{item.title}</div>
+                        <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:8px;">{item.description}</div>
+                        {item.certificate_note && (
+                          <div style="font-size:12px;color:#6b7280;font-style:italic;margin-bottom:8px;">{item.certificate_note}</div>
+                        )}
+                        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                          {item.tags.map((tag) => (
+                            <span style={`display:inline-block;padding:3px 9px;border-radius:4px;font-size:12px;font-weight:500;background:${tag === "Free" ? "#dcfce7" : tag === "Paid" ? "#fef3c7" : "#f3f4f6"};color:${tag === "Free" ? "#166534" : tag === "Paid" ? "#92400e" : "#6b7280"};`}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {item.url !== "#" && (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer nofollow" style="display:inline-block;background:#1a1a1a;color:white;text-decoration:none;padding:9px 16px;border-radius:5px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;">
+                          View →
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- 08 — Projects -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #7c3aed;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">08</div>
+              <div style="font-size:16px;font-weight:700;">Projects to Build</div>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #7c3aed;background:#faf5ff;">
+              {report.sections.projects.items.map((item) => (
+                <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-top:12px;background:white;">
+                  <div style="font-weight:700;font-size:15px;margin-bottom:6px;">{item.title}</div>
+                  <div style="font-size:14px;color:#374151;line-height:1.65;margin-bottom:10px;">{item.description}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+                    <span style="display:inline-block;background:#f3f4f6;color:#6b7280;padding:3px 9px;border-radius:4px;font-size:12px;">{item.skill_label}</span>
+                    <span style="display:inline-block;background:#f3f4f6;color:#6b7280;padding:3px 9px;border-radius:4px;font-size:12px;">{item.time_estimate}</span>
+                    <span style={`display:inline-block;padding:3px 9px;border-radius:4px;font-size:12px;background:${item.difficulty === "beginner" ? "#dcfce7" : item.difficulty === "intermediate" ? "#fef3c7" : "#fee2e2"};color:${item.difficulty === "beginner" ? "#166534" : item.difficulty === "intermediate" ? "#92400e" : "#991b1b"};text-transform:capitalize;`}>
+                      {item.difficulty}
+                    </span>
+                  </div>
+                  <div style="font-size:13px;color:#7c3aed;font-weight:600;">
+                    Demonstrates: {item.demonstrates.join(", ")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- 09 — Resume Recommendations -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #64748b;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">09</div>
+              <div style="font-size:16px;font-weight:700;">Resume Recommendations</div>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #64748b;background:#f8fafc;">
+              {report.sections.resume_recommendations.items.map((item) => (
+                <div style="border:1px solid #e5e7eb;border-radius:7px;padding:16px 18px;margin-top:12px;background:white;">
+                  <div style="font-weight:700;font-size:15px;margin-bottom:6px;">{item.title}</div>
+                  <div style="font-size:14px;color:#374151;line-height:1.65;margin-bottom:10px;">{item.explanation}</div>
+                  {item.current_example && (
+                    <div style="background:#fef2f2;border-left:3px solid #fca5a5;padding:10px 14px;border-radius:0 4px 4px 0;font-size:13px;color:#7f1d1d;margin-bottom:8px;line-height:1.55;">
+                      <strong>Current:</strong> {item.current_example}
+                    </div>
+                  )}
+                  {item.improved_example && (
+                    <div style="background:#f0fdf4;border-left:3px solid #86efac;padding:10px 14px;border-radius:0 4px 4px 0;font-size:13px;color:#14532d;line-height:1.55;">
+                      <strong>Improved:</strong> {item.improved_example}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- 10 — 30-Day Plan -->
+          <div class="rpt-section" style="background:white;border:2px solid #e5e7eb;border-radius:8px;margin-bottom:14px;overflow:hidden;">
+            <div style="padding:18px 22px;border-left:5px solid #64748b;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-bottom:2px;">10</div>
+              <div style="font-size:16px;font-weight:700;">Your Next 30 Days</div>
+            </div>
+            <div style="padding:6px 22px 22px;border-left:5px solid #64748b;background:#f8fafc;">
+              {report.sections.thirty_day_plan.weeks.map((week) => (
+                <div style="border:1px solid #e5e7eb;border-radius:7px;padding:18px;margin-top:12px;background:white;">
+                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;margin-bottom:5px;">{week.label}</div>
+                  <div style="font-size:16px;font-weight:700;margin-bottom:10px;">{week.focus}</div>
+                  <ul style="padding-left:18px;margin:0;">
+                    {week.actions.map((action) => (
+                      <li style="font-size:14px;color:#374151;padding:4px 0;line-height:1.55;">{action}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Rating + PDF download -->
+          <div class="no-print" style="text-align:center;padding:40px 0 20px;">
+            <StarRating reportId={report.id} client:load />
+            <button onclick="window.print()" style="background:#1a1a1a;color:white;border:none;padding:16px 40px;font-size:16px;font-weight:700;border-radius:7px;cursor:pointer;font-family:inherit;margin-top:8px;">
+              ↓ Download as PDF
+            </button>
+            <p style="font-size:12px;color:#9ca3af;margin-top:10px;">Opens browser print dialog — choose Save as PDF</p>
+          </div>
+
+          <!-- Footer -->
+          <div class="no-print" style="text-align:center;padding-bottom:40px;font-size:12px;color:#9ca3af;">
+            <a href="/privacy/" style="color:#9ca3af;margin:0 8px;">Privacy Policy</a>
+            ·
+            <a href="/terms/" style="color:#9ca3af;margin:0 8px;">Terms</a>
+            ·
+            <a href="/koalafied/" style="color:#9ca3af;margin:0 8px;">Run a new analysis</a>
+          </div>
+
+        </div>
+      </div>
+    )}
+
+  </body>
+</html>
