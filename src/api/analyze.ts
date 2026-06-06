@@ -176,10 +176,10 @@ async function runJob(params: JobParams): Promise<void> {
     // Step 8: Update kitRetry record to include report_id (enables manual recovery if Kit fails)
     await redis.setex(kitRetryKey(job_id), 24 * 60 * 60, { email, job_id, report_id }).catch(() => {});
 
-    // Step 9: Kit — subscribe, store report URL, trigger report email, apply quiz tags
+    // Step 9: Kit — subscribe, send transactional report email, apply quiz tags
     const reportUrl = `${import.meta.env.SITE}/koalafied/report/${report_id}`;
     try {
-      await subscribeWithReport(email, reportUrl, quiz);
+      await subscribeWithReport(email, reportUrl, report_id, quiz);
     } catch (kitErr) {
       // Non-fatal: report is already delivered via browser redirect. Log + tag for failure sequence.
       console.error(`[koalafied] Kit failed for job ${job_id}:`, kitErr);

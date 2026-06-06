@@ -1,5 +1,7 @@
 // Kit v4 API integration for Koalafied
-// Handles subscriber creation, quiz tagging, and report email delivery via form automation.
+// Report emails are sent via per-submission broadcasts with the URL baked into
+// content at creation time — eliminates the custom-field overwrite race and
+// ensures repeat submitters always receive their specific report link.
 
 import type { QuizAnswers } from "@/lib/types";
 
@@ -10,7 +12,6 @@ if (!process.env.KIT_API_KEY) {
 const KIT_API_KEY = process.env.KIT_API_KEY as string;
 const KIT_BASE = "https://api.kit.com/v4";
 
-// Tag names applied per quiz answer — prefixed with "koalafied:" for easy filtering in Kit.
 const QUIZ_TAGS: Record<keyof QuizAnswers, Record<string, string>> = {
   job_search_stage: {
     active:               "koalafied:search:active",
@@ -44,44 +45,29 @@ const QUIZ_TAGS: Record<keyof QuizAnswers, Record<string, string>> = {
   },
 };
 
-// Creates or updates the subscriber with the report URL as a custom field, then adds
-// them to the Koalafied Kit form (which triggers the report email automation).
-// Quiz tagging is fired and forgotten — tag failures don't fail the job.
-// Throws on subscriber create or form-add failure (both logged + surfaced via kitRetry).
+// Creates or updates the subscriber, applies quiz tags, and sends the report
+// delivery email. Throws on subscriber create or broadcast failure (both logged
+// and surfaced via kitRetry in analyze.ts).
 export async function subscribeWithReport(
   email: string,
   reportUrl: string,
+  reportId: string,
   quiz: QuizAnswers,
 ): Promise<void> {
-  const formId = process.env.KIT_FORM_ID as string | undefined;
-  if (!formId) throw new Error("Missing KIT_FORM_ID");
-
-  // Create or update subscriber — stores report_url as a custom field so the
-  // email template can reference {{ subscriber.report_url }}
   const subRes = await kitFetch("/subscribers", {
     method: "POST",
-    body: JSON.stringify({
-      email_address: email,
-      fields: { report_url: reportUrl },
-    }),
+    body: JSON.stringify({ email_address: email }),
   });
   if (!subRes.ok) {
     throw new Error(`Kit subscriber create failed: ${subRes.status} ${await subRes.text()}`);
   }
 
-  // Add to the Koalafied form — this is what triggers the report link email in Kit
-  const formRes = await kitFetch(`/forms/${formId}/subscribers`, {
-    method: "POST",
-    body: JSON.stringify({ email_address: email }),
-  });
-  if (!formRes.ok) {
-    throw new Error(`Kit form add failed: ${formRes.status} ${await formRes.text()}`);
-  }
-
-  // Apply quiz tags — non-critical, fire and forget
+  // Fire and forget — tag failures don't fail the job
   applyQuizTags(email, quiz).catch((err) =>
     console.error("[koalafied] Kit quiz tagging failed:", err),
   );
+
+  await sendReportEmail(email, reportUrl, reportId);
 }
 
 // Tags subscriber with report_failed so Kit routes them to the failure sequence.
@@ -93,6 +79,56 @@ export async function tagReportFailed(email: string): Promise<void> {
     method: "POST",
     body: JSON.stringify({ email_address: email }),
   }).catch(() => {});
+}
+
+// Creates a unique per-submission tag, applies it to the subscriber, then creates
+// a Kit broadcast targeting that tag with the report URL baked into the body.
+// published_at = now triggers immediate delivery. Each submission gets its own
+// broadcast so repeat submitters always receive the correct URL.
+async function sendReportEmail(email: string, reportUrl: string, reportId: string): Promise<void> {
+  const tagName = `koalafied:rpt:${reportId.slice(0, 8)}`;
+  const tagId = await ensureTag(tagName);
+  if (!tagId) throw new Error("Failed to create submission tag for report email");
+
+  const tagRes = await kitFetch(`/tags/${tagId}/subscribers`, {
+    method: "POST",
+    body: JSON.stringify({ email_address: email }),
+  });
+  if (!tagRes.ok) {
+    throw new Error(`Failed to tag subscriber for report delivery: ${tagRes.status} ${await tagRes.text()}`);
+  }
+
+  const broadcastRes = await kitFetch("/broadcasts", {
+    method: "POST",
+    body: JSON.stringify({
+      subject: "Your Koalafied PM report is ready",
+      content: reportEmailHtml(reportUrl),
+      subscriber_filter: [{ all: [{ type: "tag", ids: [Number(tagId)] }] }],
+      published_at: new Date().toISOString(),
+    }),
+  });
+  if (!broadcastRes.ok) {
+    throw new Error(`Kit broadcast failed: ${broadcastRes.status} ${await broadcastRes.text()}`);
+  }
+}
+
+function reportEmailHtml(reportUrl: string): string {
+  return `
+<p>Your Koalafied PM fit analysis is ready.</p>
+<p style="margin:24px 0;">
+  <a href="${reportUrl}"
+     style="background:#000;color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600;display:inline-block;">
+    View Your Report &rarr;
+  </a>
+</p>
+<p>Or paste this link in your browser:<br>
+  <a href="${reportUrl}">${reportUrl}</a>
+</p>
+<p style="color:#888;font-size:12px;margin-top:24px;">
+  This link expires in 30 days. Run a fresh analysis at
+  <a href="https://mattgeer.com/koalafied" style="color:#888;">mattgeer.com/koalafied</a>.
+</p>
+  `.trim();
 }
 
 async function applyQuizTags(email: string, quiz: QuizAnswers): Promise<void> {
