@@ -3,11 +3,11 @@
 
 import type { QuizAnswers } from "@/lib/types";
 
-if (!import.meta.env.KIT_API_KEY) {
+if (!process.env.KIT_API_KEY) {
   throw new Error("Missing KIT_API_KEY");
 }
 
-const KIT_API_KEY = import.meta.env.KIT_API_KEY as string;
+const KIT_API_KEY = process.env.KIT_API_KEY as string;
 const KIT_BASE = "https://api.kit.com/v4";
 
 // Tag names applied per quiz answer — prefixed with "koalafied:" for easy filtering in Kit.
@@ -53,7 +53,7 @@ export async function subscribeWithReport(
   reportUrl: string,
   quiz: QuizAnswers,
 ): Promise<void> {
-  const formId = import.meta.env.KIT_FORM_ID as string | undefined;
+  const formId = process.env.KIT_FORM_ID as string | undefined;
   if (!formId) throw new Error("Missing KIT_FORM_ID");
 
   // Create or update subscriber — stores report_url as a custom field so the

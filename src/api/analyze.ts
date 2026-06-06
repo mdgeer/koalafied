@@ -40,7 +40,7 @@ function validEnum(key: keyof QuizAnswers, val: unknown): val is string {
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   // Rate limiting — keyed by IP; bypassed if X-Admin-Key header matches env var
-  const adminKey = import.meta.env.KOALAFIED_ADMIN_KEY;
+  const adminKey = process.env.KOALAFIED_ADMIN_KEY;
   const isAdmin = adminKey && request.headers.get("X-Admin-Key") === adminKey;
 
   if (!isAdmin) {

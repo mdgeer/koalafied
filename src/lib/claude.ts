@@ -4,12 +4,12 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import type { QuizAnswers } from "@/lib/types";
 
-if (!import.meta.env.ANTHROPIC_API_KEY) {
+if (!process.env.ANTHROPIC_API_KEY) {
   throw new Error("Missing ANTHROPIC_API_KEY");
 }
 
 export const anthropic = new Anthropic({
-  apiKey: import.meta.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export const CLAUDE_MODEL = "claude-sonnet-4-6";
@@ -59,7 +59,7 @@ Quiz answers:
 
 function loadSystemPrompt(): string {
   // Prefer env var (useful for VPS without a deployed file); fall back to file at project root.
-  const fromEnv = import.meta.env.KOALAFIED_SYSTEM_PROMPT;
+  const fromEnv = process.env.KOALAFIED_SYSTEM_PROMPT;
   if (fromEnv) return fromEnv;
   try {
     return readFileSync(join(process.cwd(), "system-prompt.txt"), "utf8");

@@ -2,13 +2,13 @@
 // Phase 2 will add the full get/set functions for job status and report storage.
 import { Redis } from "@upstash/redis";
 
-if (!import.meta.env.UPSTASH_REDIS_REST_URL || !import.meta.env.UPSTASH_REDIS_REST_TOKEN) {
+if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
   throw new Error("Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN");
 }
 
 export const redis = new Redis({
-  url: import.meta.env.UPSTASH_REDIS_REST_URL,
-  token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
 // TTL constants (seconds)

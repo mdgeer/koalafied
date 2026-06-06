@@ -182,7 +182,7 @@ export default function KoalafiedFlow() {
 
     let jobId: string;
     try {
-      const res = await fetch("/api/analyze", {
+      const res = await fetch("/api/analyze/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resume, job_description: jobDescription, email, ...answers }),
@@ -207,7 +207,7 @@ export default function KoalafiedFlow() {
     // Poll every 4 seconds
     pollRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/status/${jobId}`);
+        const res = await fetch(`/api/status/${jobId}/`);
         const data = (await res.json()) as { status: string; report_id?: string };
 
         if (data.status === "complete" && !didComplete.current) {
@@ -420,9 +420,9 @@ export default function KoalafiedFlow() {
                 </h2>
                 {stageIndex < 3 && (
                   <p style={{ color: "#9ca3af", fontSize: "15px" }}>
-                    This takes about 30–45 seconds.
+                    This usually takes 1–2 minutes.
                     <br />
-                    Your report will also be sent to {email}.
+                    Your report will also be sent to {email} — feel free to close this tab and check your inbox.
                   </p>
                 )}
               </div>
@@ -465,7 +465,7 @@ export default function KoalafiedFlow() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ background: "white", border: "2px solid #e5e7eb", borderRadius: "10px", padding: "36px" }}>
+    <div style={{ background: "white", border: "2px solid #e5e7eb", borderRadius: "10px", padding: "36px", color: "#1a1a1a" }}>
       {children}
     </div>
   );
