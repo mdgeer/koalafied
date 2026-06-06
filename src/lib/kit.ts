@@ -63,8 +63,8 @@ export async function subscribeWithReport(
   }
 
   // Fire and forget — tag failures don't fail the job
-  applyQuizTags(email, quiz).catch((err) =>
-    console.error("[koalafied] Kit quiz tagging failed:", err),
+  applySubscriberTags(email, quiz).catch((err) =>
+    console.error("[koalafied] Kit tagging failed:", err),
   );
 
   await sendReportEmail(email, reportUrl, reportId);
@@ -98,11 +98,18 @@ async function sendReportEmail(email: string, reportUrl: string, reportId: strin
     throw new Error(`Failed to tag subscriber for report delivery: ${tagRes.status} ${await tagRes.text()}`);
   }
 
+  // KIT_REPORT_TEMPLATE_ID: optional — set in .env once a branded template is
+  // created in Kit UI. Wraps the content in header/footer + unsubscribe link.
+  const templateId = process.env.KIT_REPORT_TEMPLATE_ID
+    ? Number(process.env.KIT_REPORT_TEMPLATE_ID)
+    : undefined;
+
   const broadcastRes = await kitFetch("/broadcasts", {
     method: "POST",
     body: JSON.stringify({
       subject: "Your Koalafied PM report is ready",
       content: reportEmailHtml(reportUrl),
+      ...(templateId !== undefined && { email_template_id: templateId }),
       subscriber_filter: [{ all: [{ type: "tag", ids: [Number(tagId)] }] }],
       published_at: new Date().toISOString(),
     }),
@@ -131,10 +138,17 @@ function reportEmailHtml(reportUrl: string): string {
   `.trim();
 }
 
-async function applyQuizTags(email: string, quiz: QuizAnswers): Promise<void> {
-  const tagNames = (Object.keys(quiz) as (keyof QuizAnswers)[])
-    .map((field) => QUIZ_TAGS[field]?.[quiz[field]])
-    .filter(Boolean) as string[];
+// Applies the master subscriber tag, report_delivered tag, and all quiz tags.
+// koalafied:subscriber — every successful submission; master segment for nurture sequences
+// koalafied:report_delivered — successful reports only; used as the nurture sequence trigger
+async function applySubscriberTags(email: string, quiz: QuizAnswers): Promise<void> {
+  const tagNames = [
+    "koalafied:subscriber",
+    "koalafied:report_delivered",
+    ...(Object.keys(quiz) as (keyof QuizAnswers)[])
+      .map((field) => QUIZ_TAGS[field]?.[quiz[field]])
+      .filter(Boolean) as string[],
+  ];
 
   await Promise.all(
     tagNames.map(async (name) => {
