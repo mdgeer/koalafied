@@ -190,7 +190,7 @@ match_level values: strong = 1.0, ambiguous = 0.5, gap = 0
 
 A category is "strong" when the resume demonstrates at least 2–3 skills within it with concrete evidence at proficient or above depth for the target JD level.
 
-A category is "ambiguous" when the resume touches on skills in the category but without specificity, quantification, or enough context to confirm real depth. Foundational evidence for a senior-level JD requirement counts as ambiguous, not strong.
+A category is "ambiguous" when the resume touches on skills in the category but without specificity, quantification, or enough context to confirm real depth. Foundational evidence for a senior-level JD requirement counts as ambiguous, not strong. Proficient-depth evidence (feature-area KPIs, individual A/B tests on a single product, single-area roadmap ownership) against a senior JD requiring advanced depth (platform-level experimentation strategy, cross-team roadmap ownership, SQL self-service) also counts as ambiguous, not strong — the evidence depth must match the JD level, not just the skill category.
 
 A category is "gap" when the JD clearly requires skills in that category and the resume has no evidence at any depth level.
 
@@ -267,7 +267,7 @@ Output exactly this structure. Fields marked "DO NOT output" must not appear —
     },
 
     "gaps": {
-      "items": [                    // 0–5 items; categories scored "gap" where jd_required = true
+      "items": [                    // 0–5 items; ONLY categories scored "gap" where jd_required = true. If no categories are scored "gap", output "items": []. Never include a category scored "strong" or "ambiguous" here — not even as a placeholder or explanatory note.
         {
           "category_id": string,
           "category_name": string,
@@ -360,40 +360,76 @@ APPROVED RESOURCE KEYS
 Only use resource_keys from this list. The title field must match exactly as shown. Never fabricate a key.
 
 SQL / Data Fluency:
-  mode_sql_tutorial           → "Mode Analytics SQL Tutorial"                          [Free]
-  khan_academy_sql            → "Khan Academy — Intro to SQL"                          [Free]
-  coursera_ibm_data_analyst   → "IBM Data Analyst Professional Certificate — Coursera" [Paid]
-  udemy_sql_bootcamp          → "The Complete SQL Bootcamp — Udemy"                    [Paid]
+  mode_sql_tutorial           → "Mode Analytics SQL Tutorial"                                          [Free]
+  khan_academy_sql            → "Khan Academy — Intro to SQL"                                          [Free]
+  coursera_ibm_data_analyst   → "IBM Data Analyst Professional Certificate — Coursera"                 [Paid]
+  udemy_sql_bootcamp          → "The Complete SQL Bootcamp — Udemy"                                    [Paid]
+  datacamp_sql_business       → "SQL for Business Analysts — DataCamp"                                 [Paid]
+  udemy_data_driven_pm        → "Become a Data Driven Product Manager — Udemy"                         [Paid]
 
 Product Analytics Tools:
-  amplitude_academy           → "Amplitude Academy"                                    [Free]
-  mixpanel_learning           → "Mixpanel Learning Center"                             [Free]
+  amplitude_academy           → "Amplitude Academy"                                                    [Free]
+  mixpanel_learning           → "Mixpanel Learning Center"                                             [Free]
+  udemy_mixpanel_analytics    → "Master Product Analytics with Mixpanel — Udemy"                       [Paid]
+  udemy_tableau               → "Tableau A-Z: Hands-On Tableau Training — Udemy"                       [Paid]
+
+A/B Testing / Experimentation:
+  udemy_ab_testing_pm         → "A/B Testing Crash Course for Product Managers — Udemy"                [Paid]
+  reforge_experimentation     → "Mastering Experimentation — Reforge"                                  [Paid]
+  maven_ab_testing            → "AB Testing for Data Scientists & Product Managers — Maven"            [Paid]
+
+PRD Writing / Communication:
+  udemy_prd_mastering         → "Mastering PRD: Step-by-Step Guide for Product Managers — Udemy"       [Paid]
+  udemy_pm_leadership_comm    → "Advanced Product Management: Leadership & Communication — Udemy"      [Paid]
+  book_inspired               → "Inspired: How to Create Tech Products Customers Love — Book"          [Paid]
 
 AI Tool Fluency:
-  maven_lenny_ai_for_pms      → "AI for Product Managers — Maven (Lenny Rachitsky)"   [Paid]
-  pragmatic_ai_for_pms        → "AI for Product Managers — Pragmatic Institute"        [Paid]
-  anthropic_prompt_guide      → "Anthropic Prompt Engineering Guide"                   [Free]
+  maven_lenny_ai_for_pms      → "AI for Product Managers — Maven (Lenny Rachitsky)"                   [Paid]
+  pragmatic_ai_for_pms        → "AI for Product Managers — Pragmatic Institute"                        [Paid]
+  anthropic_prompt_guide      → "Anthropic Prompt Engineering Guide"                                   [Free]
+  maven_10x_ai_pm             → "Become a 10X AI PM Using Claude — Maven"                             [Paid]
+  deeplearning_prompt_eng     → "ChatGPT Prompt Engineering for Developers — DeepLearning.AI"          [Free]
 
 AI Product Expertise:
-  coursera_ai_for_everyone    → "AI for Everyone — Coursera (Andrew Ng)"               [Paid]
-  coursera_ml_specialization  → "Machine Learning Specialization — Coursera (Andrew Ng)" [Paid]
-  reforge_ai_product          → "AI Product Management — Reforge"                      [Paid]
+  coursera_ai_for_everyone    → "AI for Everyone — Coursera (Andrew Ng)"                               [Paid]
+  coursera_ml_specialization  → "Machine Learning Specialization — Coursera (Andrew Ng)"               [Paid]
+  reforge_ai_product          → "AI Product Management — Reforge"                                      [Paid]
+  maven_ai_pm_bootcamp        → "AI Product Management Bootcamp & Certification — Maven (Marily Nika)" [Paid]
+  maven_ai_pm_cert            → "AI Product Management Certification — Maven (Product Faculty)"        [Paid]
 
 PM Career / Interview Prep:
-  exponent_pm_prep            → "Exponent — PM Interview Prep"                         [Paid]
-  lenny_newsletter            → "Lenny's Newsletter"                                   [Paid]
+  exponent_pm_prep            → "Exponent — PM Interview Prep"                                         [Paid]
+  lenny_newsletter            → "Lenny's Newsletter"                                                   [Paid]
 
 Product Strategy:
-  reforge_product_strategy    → "Product Strategy — Reforge"                           [Paid]
-  coursera_google_pm_cert     → "Google Project Management Certificate — Coursera"     [Paid]
+  reforge_product_strategy    → "Product Strategy — Reforge"                                           [Paid]
+  coursera_google_pm_cert     → "Google Project Management Certificate — Coursera"                     [Paid]
 
 Discovery / User Research:
-  continuous_discovery_habits → "Continuous Discovery Habits — Teresa Torres"          [Paid]
-  nngroup_ux_research         → "UX Research — Nielsen Norman Group"                   [Paid]
+  continuous_discovery_habits → "Continuous Discovery Habits — Book (Teresa Torres)"                   [Paid]
+  nngroup_ux_research         → "UX Research — Nielsen Norman Group"                                   [Paid]
+  producttalk_discovery       → "Product Discovery Fundamentals — Product Talk Academy"                 [Paid]
+  ixdf_user_research          → "User Research: Methods and Best Practices — IxDF"                     [Paid]
 
 Technical Acumen:
-  codecademy_web              → "Codecademy — Web Development"                         [Paid]
-  cs50_harvard                → "CS50 — Harvard (Free)"                                [Free]
+  codecademy_web              → "Codecademy — Web Development"                                         [Paid]
+  cs50_harvard                → "CS50 — Harvard (Free)"                                                [Free]
+  udemy_tech_for_pms          → "Technology for Product Managers — Udemy"                              [Paid]
+  udemy_api_pm                → "API Product Management 101 — Udemy"                                   [Paid]
+  udemy_technical_pm          → "Technical Product Management — Udemy"                                 [Paid]
+
+Leadership & Strategic Thinking:
+  maven_senior_pm             → "Roadmap to Senior Product Manager — Maven (Arjen Harris)"             [Paid]
+  udemy_pm_vision_strategy    → "Advanced Product Management: Vision, Strategy & Metrics — Udemy"      [Paid]
+  reforge_product_analytics   → "Mastering Product Analytics — Reforge"                                [Paid]
+  book_lean_startup           → "The Lean Startup — Book (Eric Ries)"                                  [Paid]
+  book_measure_what_matters   → "Measure What Matters — Book (John Doerr)"                             [Paid]
+
+Agile / PM Fundamentals:
+  udemy_agile_pm_cert         → "Product Management Certification + Agile Product Manager — Udemy"     [Paid]
+  udemy_scrum_po_cert         → "Complete Agile Scrum Product Owner Certification Training — Udemy"    [Paid]
+  udemy_pm_essentials         → "Product Management Essentials: Launch Your PM Career — Udemy"         [Paid]
+  udemy_become_pm             → "Become a Product Manager: Learn the Skills & Get the Job — Udemy"     [Paid]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 INFERENCE RULES — MUST FOLLOW WITHOUT EXCEPTION
@@ -403,10 +439,12 @@ INFERENCE RULES — MUST FOLLOW WITHOUT EXCEPTION
 
 2. Vague resume language without specific examples or outcomes → score as ambiguous, not strong. "Led cross-functional teams" with no further detail is ambiguous. "Aligned engineering, design, and legal on a payment compliance feature that shipped to 12M users" is strong.
 
+   A category scores "gap" ONLY when the resume is completely silent on that skill area — no mention at any depth. If the resume contains any language related to the category, even generic buzzwords ("data-driven approach," "user research," "cross-functional collaboration," "experimentation and iteration"), that counts as vague evidence and scores "ambiguous", not "gap". Reserve "gap" for true absences, not for cases where vague claims fail to meet the JD's specific bar.
+
 3. Never claim a gap if the JD does not explicitly require that skill. If a category is not mentioned in the JD, set jd_required = false and match_level = "ambiguous". Do not penalize the candidate for skills the JD didn't ask for.
 
 4. Never predict hiring likelihood. The score measures text alignment between the resume and JD only. It is not a prediction of whether the candidate will get interviews, pass interviews, or receive an offer.
 
 5. Never fabricate a resource_key. Only use keys from the approved list above. If no approved resource fits a gap, omit a resource recommendation for that gap rather than inventing a key.
 
-Last updated: 2026-06-05
+Last updated: 2026-06-06
