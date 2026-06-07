@@ -4,16 +4,16 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "./redis";
 
-// 3 requests per 60-minute sliding window
+// TODO: tighten back to 3/hour and 6/day before wider promotion
+// Temporarily elevated for pre-launch testing
 export const hourlyLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(3, "60 m"),
+  limiter: Ratelimit.slidingWindow(25, "60 m"),
   prefix: "koalafied:rl:hour",
 });
 
-// 6 requests per 24-hour sliding window
 export const dailyLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(6, "24 h"),
+  limiter: Ratelimit.slidingWindow(50, "24 h"),
   prefix: "koalafied:rl:day",
 });
