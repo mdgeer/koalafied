@@ -240,7 +240,7 @@ export default function KoalafiedFlow() {
   return (
     <>
       {/* Hero */}
-      <div style={{ background: "#1a1a1a" }} className="text-white text-center py-16 px-6">
+      <div style={{ background: "#1a1a1a" }} className="text-white text-center pt-24 pb-16 px-6">
         <h1 className="text-4xl font-bold tracking-tight mb-4">Are you Koalafied?</h1>
         <p style={{ color: "#9ca3af" }} className="text-lg max-w-xl mx-auto leading-relaxed">
           Paste your resume and a job description. Get a free AI-powered analysis of your fit, your
@@ -489,7 +489,7 @@ const textareaStyle: React.CSSProperties = {
   border: "2px solid #e5e7eb",
   borderRadius: "6px",
   padding: "14px",
-  fontSize: "14px",
+  fontSize: "16px",
   fontFamily: "inherit",
   resize: "vertical",
   color: "#1a1a1a",
@@ -501,7 +501,7 @@ const inputStyle: React.CSSProperties = {
   border: "2px solid #e5e7eb",
   borderRadius: "6px",
   padding: "14px",
-  fontSize: "14px",
+  fontSize: "16px",
   fontFamily: "inherit",
   color: "#1a1a1a",
   outline: "none",
