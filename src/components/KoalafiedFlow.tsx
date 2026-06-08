@@ -241,7 +241,7 @@ export default function KoalafiedFlow() {
     <>
       {/* Hero */}
       <div style={{ background: "#1a1a1a" }} className="text-white text-center py-16 px-6">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Are you Koalafied?</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Product Managers: Are you Koalafied?</h1>
         <p style={{ color: "#9ca3af" }} className="text-lg max-w-xl mx-auto leading-relaxed">
           Paste your resume and a job description. Get a free AI-powered analysis of your fit, your
           gaps, and exactly what to do about it.
